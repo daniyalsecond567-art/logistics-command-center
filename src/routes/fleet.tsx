@@ -15,12 +15,12 @@ export const Route = createFileRoute("/fleet")({
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80";
 
 const fleet = [
-  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, mpg: "7.4", year: "2022-2025", img: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80", icon: FaTruckMoving },
-  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, mpg: "7.1", year: "2021-2024", img: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80", icon: FaTruck },
-  { name: "Kenworth T680", type: "Regional Hauler", count: 512, mpg: "7.2", year: "2022-2025", img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80", icon: FaTruck },
-  { name: "Volvo VNL 860", type: "Sleeper Tractor", count: 289, mpg: "7.6", year: "2023-2025", img: "https://images.unsplash.com/photo-1586191582056-b7f0d5c0e2c1?auto=format&fit=crop&w=1200&q=80", icon: FaTruckMoving },
+  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, mpg: "7.4", year: "2022-2025", img: "https://images.unsplash.com/photo-1586191582151-f73872dfd183?auto=format&fit=crop&w=1200&q=80", icon: FaTruckMoving },
+  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, mpg: "7.1", year: "2021-2024", img: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80", icon: FaTruck },
+  { name: "Kenworth T680", type: "Regional Hauler", count: 512, mpg: "7.2", year: "2022-2025", img: "https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?auto=format&fit=crop&w=1200&q=80", icon: FaTruck },
+  { name: "Volvo VNL 860", type: "Sleeper Tractor", count: 289, mpg: "7.6", year: "2023-2025", img: "https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?auto=format&fit=crop&w=1200&q=80", icon: FaTruckMoving },
   { name: "Reefer Trailers 53'", type: "Refrigerated", count: 402, mpg: "—", year: "Mixed", img: "https://images.unsplash.com/photo-1601158935942-52255782d322?auto=format&fit=crop&w=1200&q=80", icon: FaSnowflake },
-  { name: "Car-Carrier 9-Unit", type: "Vehicle Transport", count: 158, mpg: "6.4", year: "2022-2024", img: "https://images.unsplash.com/photo-1554260570-9140fd3b7614?auto=format&fit=crop&w=1200&q=80", icon: FaCarSide },
+  { name: "Car-Carrier 9-Unit", type: "Vehicle Transport", count: 158, mpg: "6.4", year: "2022-2024", img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80", icon: FaCarSide },
 ];
 
 function FleetPage() {
