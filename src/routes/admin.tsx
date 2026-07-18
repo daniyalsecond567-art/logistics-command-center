@@ -307,8 +307,14 @@ function AudioRow({ item, onRenamed, onDeleted, onError }: {
     <div className="rounded-xl border border-border bg-secondary/30 p-4">
       {editing ? (
         <div className="space-y-2">
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-          <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          <div>
+            <input maxLength={10} value={title} onChange={(e) => setTitle(e.target.value.slice(0, 10))} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            <div className="mt-1 text-right text-[11px] text-muted-foreground">{title.length} / 10</div>
+          </div>
+          <div>
+            <textarea maxLength={10} value={desc} onChange={(e) => setDesc(e.target.value.slice(0, 10))} rows={2} className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+            <div className="mt-1 text-right text-[11px] text-muted-foreground">{desc.length} / 10</div>
+          </div>
           <div className="flex gap-2">
             <button disabled={busy} onClick={save} className="rounded-lg bg-primary-gradient px-3 py-1.5 text-xs font-semibold text-primary-foreground">Save</button>
             <button onClick={() => { setEditing(false); setTitle(item.title); setDesc(item.description); }} className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold">Cancel</button>
