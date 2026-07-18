@@ -57,7 +57,7 @@ function FleetPage() {
         {fleet.map((f) => (
           <article key={f.name} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-elevated">
             <div className="relative aspect-[16/10] overflow-hidden">
-              <img src={f.img} alt={f.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src={f.img} alt={f.name} loading="lazy" onError={(e) => { const t = e.currentTarget; if (t.src !== FALLBACK_IMG) t.src = FALLBACK_IMG; }} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-navy/80 to-transparent" />
               <span className="absolute right-3 top-3 rounded-full bg-navy/85 px-3 py-1 text-xs font-bold text-navy-foreground">
                 {f.count} units
