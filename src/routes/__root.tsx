@@ -125,22 +125,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   return (
     <QueryClientProvider client={queryClient}>
-      {mounted ? (
-        <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">
-              <Outlet />
-            </main>
-            <Footer />
-          </div>
-        </AuthProvider>
-      ) : (
+      <AuthProvider>
         <div className="flex min-h-screen flex-col">
           <Navbar />
           <main className="flex-1">
@@ -148,7 +135,7 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
-      )}
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
