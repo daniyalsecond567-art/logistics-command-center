@@ -42,9 +42,9 @@ const dispatchBoard = [
 ];
 
 const fleetCards = [
-  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80" },
-  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, image: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80" },
-  { name: "Kenworth T680", type: "Regional Hauler", count: 512, image: "https://images.unsplash.com/photo-1586191582056-b7f0d5c0e2c1?auto=format&fit=crop&w=1200&q=80" },
+  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, image: "https://images.unsplash.com/photo-1586191582151-f73872dfd183?auto=format&fit=crop&w=1200&q=80" },
+  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80" },
+  { name: "Kenworth T680", type: "Regional Hauler", count: 512, image: "https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?auto=format&fit=crop&w=1200&q=80" },
 ];
 
 const activity = [
@@ -222,6 +222,7 @@ function HomePage() {
                   alt={f.name}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
+                  onError={(e) => { const t = e.currentTarget; const fb = "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80"; if (t.src !== fb) t.src = fb; }}
                 />
                 <span className="absolute right-3 top-3 rounded-full bg-navy/85 px-2.5 py-1 text-xs font-semibold text-navy-foreground">
                   {f.count} units
