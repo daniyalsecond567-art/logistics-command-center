@@ -11,6 +11,9 @@ import {
   FaGasPump,
 } from "react-icons/fa";
 import { HiArrowRight } from "react-icons/hi";
+import cascadiaImg from "@/assets/truck-cascadia.jpg";
+import peterbiltImg from "@/assets/truck-peterbilt.jpg";
+import kenworthImg from "@/assets/truck-kenworth.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
