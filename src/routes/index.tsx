@@ -11,6 +11,9 @@ import {
   FaGasPump,
 } from "react-icons/fa";
 import { HiArrowRight } from "react-icons/hi";
+import cascadiaImg from "@/assets/truck-cascadia.jpg";
+import peterbiltImg from "@/assets/truck-peterbilt.jpg";
+import kenworthImg from "@/assets/truck-kenworth.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,9 +45,9 @@ const dispatchBoard = [
 ];
 
 const fleetCards = [
-  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80" },
-  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, image: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80" },
-  { name: "Kenworth T680", type: "Regional Hauler", count: 512, image: "https://images.unsplash.com/photo-1586191582056-b7f0d5c0e2c1?auto=format&fit=crop&w=1200&q=80" },
+  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, image: cascadiaImg },
+  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, image: peterbiltImg },
+  { name: "Kenworth T680", type: "Regional Hauler", count: 512, image: kenworthImg },
 ];
 
 const activity = [
@@ -129,13 +132,13 @@ function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="hidden lg:block"
           >
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md shadow-elevated">
+            <div className="rounded-2xl border border-white/15 bg-navy/70 p-6 backdrop-blur-xl shadow-elevated ring-1 ring-white/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs uppercase tracking-widest text-navy-foreground/60">Live Ops Feed</div>
-                  <div className="mt-1 font-display text-xl font-bold">Central Dispatch — DFW</div>
+                  <div className="text-xs uppercase tracking-widest text-navy-foreground/70">Live Ops Feed</div>
+                  <div className="mt-1 font-display text-xl font-bold text-white">Central Dispatch — DFW</div>
                 </div>
-                <span className="grid h-9 w-9 place-items-center rounded-lg bg-success/20 text-success">
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-success/25 text-success ring-1 ring-success/40">
                   <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                 </span>
               </div>
@@ -143,15 +146,15 @@ function HomePage() {
                 {dispatchBoard.slice(0, 4).map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 text-sm"
+                    className="flex items-center justify-between rounded-xl bg-white/10 px-4 py-3 text-sm ring-1 ring-white/10"
                   >
-                    <div>
-                      <div className="font-semibold">{r.id}</div>
-                      <div className="text-xs text-navy-foreground/60">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-white">{r.id}</div>
+                      <div className="text-xs text-navy-foreground/75 truncate">
                         {r.origin} → {r.dest}
                       </div>
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyle(r.status)}`}>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyle(r.status)}`}>
                       {r.status}
                     </span>
                   </div>
@@ -222,6 +225,7 @@ function HomePage() {
                   alt={f.name}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
+                  onError={(e) => { const t = e.currentTarget; const fb = "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80"; if (t.src !== fb) t.src = fb; }}
                 />
                 <span className="absolute right-3 top-3 rounded-full bg-navy/85 px-2.5 py-1 text-xs font-semibold text-navy-foreground">
                   {f.count} units

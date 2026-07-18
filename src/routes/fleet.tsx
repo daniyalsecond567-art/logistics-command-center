@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FaTruck, FaTruckMoving, FaTrailer, FaSnowflake, FaCarSide, FaOilCan } from "react-icons/fa";
+import cascadiaImg from "@/assets/truck-cascadia.jpg";
+import peterbiltImg from "@/assets/truck-peterbilt.jpg";
+import kenworthImg from "@/assets/truck-kenworth.jpg";
+import volvoImg from "@/assets/truck-volvo.jpg";
+import reeferImg from "@/assets/truck-reefer.jpg";
+import carrierImg from "@/assets/truck-carrier.jpg";
 
 export const Route = createFileRoute("/fleet")({
   head: () => ({
@@ -12,15 +18,15 @@ export const Route = createFileRoute("/fleet")({
   component: FleetPage,
 });
 
-const FALLBACK_IMG = "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80";
+const FALLBACK_IMG = cascadiaImg;
 
 const fleet = [
-  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, mpg: "7.4", year: "2022-2025", img: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80", icon: FaTruckMoving },
-  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, mpg: "7.1", year: "2021-2024", img: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80", icon: FaTruck },
-  { name: "Kenworth T680", type: "Regional Hauler", count: 512, mpg: "7.2", year: "2022-2025", img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80", icon: FaTruck },
-  { name: "Volvo VNL 860", type: "Sleeper Tractor", count: 289, mpg: "7.6", year: "2023-2025", img: "https://images.unsplash.com/photo-1586191582056-b7f0d5c0e2c1?auto=format&fit=crop&w=1200&q=80", icon: FaTruckMoving },
-  { name: "Reefer Trailers 53'", type: "Refrigerated", count: 402, mpg: "—", year: "Mixed", img: "https://images.unsplash.com/photo-1601158935942-52255782d322?auto=format&fit=crop&w=1200&q=80", icon: FaSnowflake },
-  { name: "Car-Carrier 9-Unit", type: "Vehicle Transport", count: 158, mpg: "6.4", year: "2022-2024", img: "https://images.unsplash.com/photo-1554260570-9140fd3b7614?auto=format&fit=crop&w=1200&q=80", icon: FaCarSide },
+  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, mpg: "7.4", year: "2022-2025", img: cascadiaImg, icon: FaTruckMoving },
+  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, mpg: "7.1", year: "2021-2024", img: peterbiltImg, icon: FaTruck },
+  { name: "Kenworth T680", type: "Regional Hauler", count: 512, mpg: "7.2", year: "2022-2025", img: kenworthImg, icon: FaTruck },
+  { name: "Volvo VNL 860", type: "Sleeper Tractor", count: 289, mpg: "7.6", year: "2023-2025", img: volvoImg, icon: FaTruckMoving },
+  { name: "Reefer Trailers 53'", type: "Refrigerated", count: 402, mpg: "—", year: "Mixed", img: reeferImg, icon: FaSnowflake },
+  { name: "Car-Carrier 9-Unit", type: "Vehicle Transport", count: 158, mpg: "6.4", year: "2022-2024", img: carrierImg, icon: FaCarSide },
 ];
 
 function FleetPage() {
