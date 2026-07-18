@@ -10,7 +10,7 @@ import {
   renameTraining,
   type TrainingAudio,
 } from "@/services/trainingService";
-import { uploadAudioToCloudinary } from "@/lib/cloudinary";
+import { uploadAudioBalanced } from "@/lib/uploadRouter";
 import { formatBytes, formatDuration } from "@/utils/format";
 
 export const Route = createFileRoute("/admin")({
@@ -210,12 +210,12 @@ function UploadPanel({ onUploaded, onError, nextOrder }: { onUploaded: () => Pro
     setBusy(true);
     setProgress(0);
     try {
-      const res = await uploadAudioToCloudinary(file, setProgress);
+      const res = await uploadAudioBalanced(file, nextOrder - 1, setProgress);
       await createTraining({
         title: title.trim(),
         description: desc.trim(),
-        audioUrl: res.secure_url,
-        duration: res.duration ?? 0,
+        audioUrl: res.audioUrl,
+        duration: res.duration,
         displayOrder: nextOrder,
       });
       setFile(null); setTitle(""); setDesc(""); setProgress(0);
