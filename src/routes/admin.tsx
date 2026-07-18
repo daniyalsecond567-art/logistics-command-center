@@ -250,12 +250,18 @@ function UploadPanel({ onUploaded, onError, nextOrder }: { onUploaded: () => Pro
       </label>
 
       <label className="mt-4 block text-sm">
-        <span className="mb-1 block font-medium text-navy">Title</span>
-        <input required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Driver Safety Brief 001" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+        <span className="mb-1 flex items-center justify-between font-medium text-navy">
+          <span>Title</span>
+          <span className="text-xs font-normal text-muted-foreground">{title.length} / 10</span>
+        </span>
+        <input required maxLength={10} value={title} onChange={(e) => setTitle(e.target.value.slice(0, 10))} placeholder="Brief 001" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
       </label>
       <label className="mt-3 block text-sm">
-        <span className="mb-1 block font-medium text-navy">Description <span className="font-normal text-muted-foreground">(optional)</span></span>
-        <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+        <span className="mb-1 flex items-center justify-between font-medium text-navy">
+          <span>Note <span className="font-normal text-muted-foreground">(optional)</span></span>
+          <span className="text-xs font-normal text-muted-foreground">{desc.length} / 10</span>
+        </span>
+        <textarea maxLength={10} value={desc} onChange={(e) => setDesc(e.target.value.slice(0, 10))} rows={2} className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
       </label>
 
       {busy && (
