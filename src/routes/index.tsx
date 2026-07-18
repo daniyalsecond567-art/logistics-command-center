@@ -129,13 +129,13 @@ function HomePage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="hidden lg:block"
           >
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md shadow-elevated">
+            <div className="rounded-2xl border border-white/15 bg-navy/70 p-6 backdrop-blur-xl shadow-elevated ring-1 ring-white/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs uppercase tracking-widest text-navy-foreground/60">Live Ops Feed</div>
-                  <div className="mt-1 font-display text-xl font-bold">Central Dispatch — DFW</div>
+                  <div className="text-xs uppercase tracking-widest text-navy-foreground/70">Live Ops Feed</div>
+                  <div className="mt-1 font-display text-xl font-bold text-white">Central Dispatch — DFW</div>
                 </div>
-                <span className="grid h-9 w-9 place-items-center rounded-lg bg-success/20 text-success">
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-success/25 text-success ring-1 ring-success/40">
                   <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                 </span>
               </div>
@@ -143,15 +143,15 @@ function HomePage() {
                 {dispatchBoard.slice(0, 4).map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 text-sm"
+                    className="flex items-center justify-between rounded-xl bg-white/10 px-4 py-3 text-sm ring-1 ring-white/10"
                   >
-                    <div>
-                      <div className="font-semibold">{r.id}</div>
-                      <div className="text-xs text-navy-foreground/60">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-white">{r.id}</div>
+                      <div className="text-xs text-navy-foreground/75 truncate">
                         {r.origin} → {r.dest}
                       </div>
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyle(r.status)}`}>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyle(r.status)}`}>
                       {r.status}
                     </span>
                   </div>
