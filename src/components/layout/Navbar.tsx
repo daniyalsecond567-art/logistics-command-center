@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
-import { FaTruckMoving } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import logoUrl from "@/assets/logo.png";
 
 const links = [
   { to: "/", label: "Home" },
@@ -23,9 +23,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
       <div className="container-max flex h-16 items-center justify-between gap-4 lg:h-20">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-gradient text-primary-foreground shadow-glow transition-transform group-hover:scale-105">
-            <FaTruckMoving className="h-5 w-5" />
+        <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-white ring-1 ring-border shadow-card transition-transform group-hover:scale-105 overflow-hidden">
+            <img src={logoUrl} alt="Trucking-1 logo" width={44} height={44} className="h-9 w-9 object-contain" />
           </div>
           <div className="flex flex-col leading-tight">
             <span className="font-display text-lg font-bold tracking-tight text-navy">TRUCKING-1</span>
