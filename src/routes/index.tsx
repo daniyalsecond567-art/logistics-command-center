@@ -45,9 +45,9 @@ const dispatchBoard = [
 ];
 
 const fleetCards = [
-  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, image: "https://images.unsplash.com/photo-1586191582151-f73872dfd183?auto=format&fit=crop&w=1200&q=80" },
-  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80" },
-  { name: "Kenworth T680", type: "Regional Hauler", count: 512, image: "https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?auto=format&fit=crop&w=1200&q=80" },
+  { name: "Freightliner Cascadia", type: "Sleeper Tractor", count: 842, image: cascadiaImg },
+  { name: "Peterbilt 579", type: "Long-haul Tractor", count: 614, image: peterbiltImg },
+  { name: "Kenworth T680", type: "Regional Hauler", count: 512, image: kenworthImg },
 ];
 
 const activity = [
