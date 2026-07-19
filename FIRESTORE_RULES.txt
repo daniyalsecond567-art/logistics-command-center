@@ -1,40 +1,70 @@
-// Trucking-1 Firestore Security Rules
+// Trucking-1 Firestore Security Rules — COMPLETE
 // Deploy in Firebase Console → Firestore Database → Rules
+//
+// Collection summary
+// ------------------
+//  trainingAudio  — Public READ (anyone can browse the training briefs).
+//                   Admin WRITE (create/update/delete require an authenticated
+//                   Firebase user; the app has no public sign-up flow, so any
+//                   successful login is an administrator).
+//
+//  userRequests   — Public CREATE with strict validation (short text, must
+//                   start as "Pending"). Admin READ + DELETE only.
+//                   No updates allowed (requests are immutable).
+//
+//  Everything else — Default denied. Add explicit blocks below if a new
+//                    collection is introduced.
+//
+// Notes
+// -----
+//  • Firebase Authentication itself (Email/Password sign-in) does NOT need
+//    Firestore rules — it is handled by the Auth service.
+//  • Cloudinary and Supabase Storage are external services; their access is
+//    controlled by their own dashboards (unsigned upload preset for
+//    Cloudinary, bucket policies for Supabase). Firestore rules do not
+//    apply to them.
+//  • Audio files themselves live on Cloudinary / Supabase; Firestore only
+//    stores the resulting metadata (title, note, single audioUrl, duration,
+//    displayOrder, createdAt).
 
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ---------------------------------------------------------------
     // Training audio metadata
+    // Public read · Admin (any authenticated user) write
+    // ---------------------------------------------------------------
     match /trainingAudio/{docId} {
-      // Anyone (including unauthenticated visitors) can read training briefs.
       allow read: if true;
-
-      // Only authenticated administrators can create, edit, or delete.
-      // Admin accounts are provisioned in the Firebase Console — the app has
-      // no public sign-up flow, so any successful login = admin.
       allow create, update, delete: if request.auth != null;
     }
 
-    // User requests submitted from the Training page.
+    // ---------------------------------------------------------------
+    // User requests submitted from the Training page
+    // Public create (validated) · Admin read + delete · No updates
+    // ---------------------------------------------------------------
     match /userRequests/{docId} {
-      // Anyone can submit a request; keep it short and pending.
+      // Anyone may submit a short request. Enforce shape + length + status.
       allow create: if
+        request.resource.data.keys().hasOnly(['text', 'status', 'createdAt']) &&
         request.resource.data.text is string &&
         request.resource.data.text.size() > 0 &&
         request.resource.data.text.size() <= 20 &&
-        request.resource.data.status == "Pending";
+        request.resource.data.status == 'Pending';
 
-      // Only admins can read or delete requests.
+      // Only administrators (authenticated users) can view or remove requests.
       allow read, delete: if request.auth != null;
 
-      // No editing.
+      // Requests are immutable — no client-side editing.
       allow update: if false;
     }
 
-
-    // Default deny for anything else.
+    // ---------------------------------------------------------------
+    // Default deny — every other path is closed until an explicit
+    // block above allows it.
+    // ---------------------------------------------------------------
     match /{document=**} {
       allow read, write: if false;
     }
