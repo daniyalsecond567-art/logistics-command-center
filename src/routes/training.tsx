@@ -104,9 +104,82 @@ function TrainingPage() {
           </div>
         )}
       </section>
+      {showRequest && <RequestModal onClose={() => setShowRequest(false)} />}
     </div>
   );
 }
+
+function RequestModal({ onClose }: { onClose: () => void }) {
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+  const lastSubmitRef = useRef(0);
+
+  const submit = async () => {
+    const clean = text.trim();
+    if (!clean) { setErr("Please enter a request."); return; }
+    const now = Date.now();
+    if (now - lastSubmitRef.current < 2000) { setErr("Please wait a moment before submitting again."); return; }
+    lastSubmitRef.current = now;
+    setBusy(true); setErr(null);
+    try {
+      await createRequest(clean);
+      setDone(true);
+      setTimeout(onClose, 1200);
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-elevated" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold text-navy">New request</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary" aria-label="Close">
+            <FaTimes className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">Send a short request to the training team.</p>
+
+        {done ? (
+          <div className="mt-6 flex items-center gap-2 rounded-lg bg-success/10 p-4 text-sm font-semibold text-success">
+            <FaCheckCircle /> Request submitted.
+          </div>
+        ) : (
+          <>
+            <label className="mt-5 block text-sm">
+              <span className="mb-1 flex items-center justify-between font-medium text-navy">
+                <span>Request</span>
+                <span className="text-xs font-normal text-muted-foreground">{text.length} / 20</span>
+              </span>
+              <input
+                autoFocus
+                maxLength={20}
+                value={text}
+                onChange={(e) => setText(e.target.value.slice(0, 20))}
+                onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+                placeholder="e.g. Add HOS brief"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </label>
+            {err && <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 p-2 text-xs text-destructive">{err}</div>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-navy hover:bg-secondary">Cancel</button>
+              <button disabled={busy || !text.trim()} onClick={submit} className="rounded-lg bg-primary-gradient px-4 py-2 text-sm font-semibold text-primary-foreground shadow-card disabled:opacity-60">
+                {busy ? "Submitting…" : "Submit"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function BriefCard({ item }: { item: TrainingAudio }) {
   const { playing, toggle } = useAudioPlayer(item.audioUrl);
