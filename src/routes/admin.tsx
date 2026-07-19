@@ -11,6 +11,7 @@ import {
   type TrainingAudio,
 } from "@/services/trainingService";
 import { uploadAudioBalanced } from "@/lib/uploadRouter";
+import { deleteRequest, listRequests, type UserRequest } from "@/services/requestService";
 import { formatBytes, formatDuration } from "@/utils/format";
 
 export const Route = createFileRoute("/admin")({
@@ -178,6 +179,11 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
         </div>
       </div>
 
+      <div className="container-max pb-10">
+        <RequestsPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+      </div>
+
+
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -338,3 +344,59 @@ function AudioRow({ item, onRenamed, onDeleted, onError }: {
     </div>
   );
 }
+
+function RequestsPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m: string) => void }) {
+  const [items, setItems] = useState<UserRequest[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    setLoading(true);
+    try { setItems(await listRequests()); }
+    catch (e) { onError((e as Error).message); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void refresh(); }, []);
+
+  const remove = async (id: string) => {
+    if (!confirm("Delete this request?")) return;
+    try { await deleteRequest(id); await refresh(); onOk("Request deleted."); }
+    catch (e) { onError((e as Error).message); }
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-bold text-navy">User Requests</h2>
+          <p className="text-xs text-muted-foreground">Requests submitted from the Training page.</p>
+        </div>
+        <button onClick={refresh} className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:bg-secondary">Refresh</button>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        {loading && Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="h-12 animate-pulse rounded-lg bg-secondary/70" />
+        ))}
+        {!loading && items && items.length === 0 && (
+          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+            No requests yet.
+          </div>
+        )}
+        {!loading && items && items.map((r) => (
+          <div key={r.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/30 px-3 py-2.5">
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-semibold text-navy" title={r.text}>{r.text}</div>
+              <div className="text-[11px] text-muted-foreground">
+                {r.createdAt?.toDate?.().toLocaleString() ?? "—"} · <span className="font-semibold text-primary">{r.status}</span>
+              </div>
+            </div>
+            <button onClick={() => remove(r.id)} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10" aria-label="Delete">
+              <FaTrash className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+

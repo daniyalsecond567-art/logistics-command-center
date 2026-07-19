@@ -54,6 +54,7 @@ export function Footer() {
               { to: "/training", label: "Driver Training" },
               { to: "/reports", label: "Reports" },
               { to: "/contact", label: "Contact" },
+              { to: "/terms", label: "Terms & Conditions" },
             ].map((l) => (
               <li key={l.to}>
                 <Link to={l.to} className="text-navy-foreground/80 transition-colors hover:text-primary-glow">

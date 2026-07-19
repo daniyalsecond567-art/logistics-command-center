@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList } from "react-icons/fa";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList, FaPlus, FaTimes, FaCheckCircle } from "react-icons/fa";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { listTraining, type TrainingAudio } from "@/services/trainingService";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { createRequest } from "@/services/requestService";
+
 
 export const Route = createFileRoute("/training")({
   ssr: false,
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/training")({
 
 function TrainingPage() {
   const [items, setItems] = useState<TrainingAudio[] | null>(null);
+  const [showRequest, setShowRequest] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
@@ -48,16 +51,26 @@ function TrainingPage() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <FaClipboardList /> Internal driver resources — for company personnel only.
           </div>
-          <div className="relative w-full max-w-xs">
-            <FaSearch className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search briefs..."
-              className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
+              <FaSearch className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search briefs..."
+                className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowRequest(true)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-card transition-colors hover:bg-primary/90"
+            >
+              <FaPlus className="h-3 w-3" /> Add Request
+            </button>
           </div>
         </div>
+
 
         {error && (
           <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
@@ -91,9 +104,82 @@ function TrainingPage() {
           </div>
         )}
       </section>
+      {showRequest && <RequestModal onClose={() => setShowRequest(false)} />}
     </div>
   );
 }
+
+function RequestModal({ onClose }: { onClose: () => void }) {
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+  const lastSubmitRef = useRef(0);
+
+  const submit = async () => {
+    const clean = text.trim();
+    if (!clean) { setErr("Please enter a request."); return; }
+    const now = Date.now();
+    if (now - lastSubmitRef.current < 2000) { setErr("Please wait a moment before submitting again."); return; }
+    lastSubmitRef.current = now;
+    setBusy(true); setErr(null);
+    try {
+      await createRequest(clean);
+      setDone(true);
+      setTimeout(onClose, 1200);
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-navy/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-elevated" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold text-navy">New request</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary" aria-label="Close">
+            <FaTimes className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">Send a short request to the training team.</p>
+
+        {done ? (
+          <div className="mt-6 flex items-center gap-2 rounded-lg bg-success/10 p-4 text-sm font-semibold text-success">
+            <FaCheckCircle /> Request submitted.
+          </div>
+        ) : (
+          <>
+            <label className="mt-5 block text-sm">
+              <span className="mb-1 flex items-center justify-between font-medium text-navy">
+                <span>Request</span>
+                <span className="text-xs font-normal text-muted-foreground">{text.length} / 20</span>
+              </span>
+              <input
+                autoFocus
+                maxLength={20}
+                value={text}
+                onChange={(e) => setText(e.target.value.slice(0, 20))}
+                onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+                placeholder="e.g. Add HOS brief"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </label>
+            {err && <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 p-2 text-xs text-destructive">{err}</div>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-navy hover:bg-secondary">Cancel</button>
+              <button disabled={busy || !text.trim()} onClick={submit} className="rounded-lg bg-primary-gradient px-4 py-2 text-sm font-semibold text-primary-foreground shadow-card disabled:opacity-60">
+                {busy ? "Submitting…" : "Submit"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function BriefCard({ item }: { item: TrainingAudio }) {
   const { playing, toggle } = useAudioPlayer(item.audioUrl);
