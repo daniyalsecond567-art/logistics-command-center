@@ -179,6 +179,11 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
         </div>
       </div>
 
+      <div className="container-max pb-10">
+        <RequestsPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+      </div>
+
+
       <AnimatePresence>
         {toast && (
           <motion.div
