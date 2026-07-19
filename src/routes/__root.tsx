@@ -142,6 +142,8 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
+        <TermsGate />
+
       </AuthProvider>
     </QueryClientProvider>
   );
