@@ -17,6 +17,23 @@ service cloud.firestore {
       allow create, update, delete: if request.auth != null;
     }
 
+    // User requests submitted from the Training page.
+    match /userRequests/{docId} {
+      // Anyone can submit a request; keep it short and pending.
+      allow create: if
+        request.resource.data.text is string &&
+        request.resource.data.text.size() > 0 &&
+        request.resource.data.text.size() <= 20 &&
+        request.resource.data.status == "Pending";
+
+      // Only admins can read or delete requests.
+      allow read, delete: if request.auth != null;
+
+      // No editing.
+      allow update: if false;
+    }
+
+
     // Default deny for anything else.
     match /{document=**} {
       allow read, write: if false;
