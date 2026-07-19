@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList } from "react-icons/fa";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList, FaPlus, FaTimes, FaCheckCircle } from "react-icons/fa";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { listTraining, type TrainingAudio } from "@/services/trainingService";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { createRequest } from "@/services/requestService";
+
 
 export const Route = createFileRoute("/training")({
   ssr: false,
