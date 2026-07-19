@@ -20,6 +20,7 @@ export const Route = createFileRoute("/training")({
 
 function TrainingPage() {
   const [items, setItems] = useState<TrainingAudio[] | null>(null);
+  const [showRequest, setShowRequest] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
