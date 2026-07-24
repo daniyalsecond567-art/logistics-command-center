@@ -11,7 +11,8 @@ import {
   type TrainingAudio,
 } from "@/services/trainingService";
 import { uploadAudioBalanced } from "@/lib/uploadRouter";
-import { deleteRequest, listRequests, type UserRequest } from "@/services/requestService";
+import { decideRequest, deleteRequest, listHistoryRequests, listPendingRequests, type UserRequest } from "@/services/requestService";
+import { FaCheck, FaTimes } from "react-icons/fa";
 import { formatBytes, formatDuration } from "@/utils/format";
 
 export const Route = createFileRoute("/admin")({
@@ -179,8 +180,9 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
         </div>
       </div>
 
-      <div className="container-max pb-10">
-        <RequestsPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+      <div className="container-max grid gap-6 pb-10 lg:grid-cols-2">
+        <PendingPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+        <HistoryPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
       </div>
 
 
@@ -345,41 +347,51 @@ function AudioRow({ item, onRenamed, onDeleted, onError }: {
   );
 }
 
-function RequestsPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m: string) => void }) {
+function PendingPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m: string) => void }) {
   const [items, setItems] = useState<UserRequest[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const refresh = async () => {
     setLoading(true);
-    try { setItems(await listRequests()); }
+    try { setItems(await listPendingRequests()); }
     catch (e) { onError((e as Error).message); }
     finally { setLoading(false); }
   };
   useEffect(() => { void refresh(); }, []);
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete this request?")) return;
-    try { await deleteRequest(id); await refresh(); onOk("Request deleted."); }
-    catch (e) { onError((e as Error).message); }
+  const decide = async (id: string, decision: "Approved" | "Declined") => {
+    setBusyId(id);
+    setItems((prev) => (prev ? prev.filter((r) => r.id !== id) : prev)); // optimistic
+    try {
+      await decideRequest(id, decision);
+      onOk(`Request ${decision.toLowerCase()}.`);
+      window.dispatchEvent(new CustomEvent("requests:history-refresh"));
+    } catch (e) {
+      onError((e as Error).message);
+      await refresh();
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-bold text-navy">User Requests</h2>
-          <p className="text-xs text-muted-foreground">Requests submitted from the Training page.</p>
+          <h2 className="font-display text-lg font-bold text-navy">User Requests <span className="text-muted-foreground">({items?.length ?? 0})</span></h2>
+          <p className="text-xs text-muted-foreground">Pending requests submitted from the Training page.</p>
         </div>
         <button onClick={refresh} className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:bg-secondary">Refresh</button>
       </div>
 
       <div className="mt-4 space-y-2">
         {loading && Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="h-12 animate-pulse rounded-lg bg-secondary/70" />
+          <div key={i} className="h-14 animate-pulse rounded-lg bg-secondary/70" />
         ))}
         {!loading && items && items.length === 0 && (
           <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            No requests yet.
+            No pending requests.
           </div>
         )}
         {!loading && items && items.map((r) => (
@@ -387,16 +399,98 @@ function RequestsPanel({ onError, onOk }: { onError: (m: string) => void; onOk: 
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold text-navy" title={r.text}>{r.text}</div>
               <div className="text-[11px] text-muted-foreground">
-                {r.createdAt?.toDate?.().toLocaleString() ?? "—"} · <span className="font-semibold text-primary">{r.status}</span>
+                {r.createdAt?.toDate?.().toLocaleString() ?? "—"} · <span className="font-semibold text-amber-600">{r.status}</span>
               </div>
             </div>
-            <button onClick={() => remove(r.id)} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10" aria-label="Delete">
-              <FaTrash className="h-3 w-3" />
-            </button>
+            <div className="flex shrink-0 gap-1.5">
+              <button
+                disabled={busyId === r.id}
+                onClick={() => decide(r.id, "Approved")}
+                className="inline-flex items-center gap-1 rounded-lg border border-success/30 bg-success/10 px-2.5 py-1.5 text-xs font-semibold text-success hover:bg-success/20 disabled:opacity-50"
+                aria-label="Approve"
+              >
+                <FaCheck className="h-3 w-3" /> Approve
+              </button>
+              <button
+                disabled={busyId === r.id}
+                onClick={() => decide(r.id, "Declined")}
+                className="inline-flex items-center gap-1 rounded-lg border border-destructive/30 bg-destructive/10 px-2.5 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/20 disabled:opacity-50"
+                aria-label="Decline"
+              >
+                <FaTimes className="h-3 w-3" /> Decline
+              </button>
+            </div>
           </div>
         ))}
       </div>
     </div>
   );
 }
+
+function HistoryPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m: string) => void }) {
+  const [items, setItems] = useState<UserRequest[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    setLoading(true);
+    try { setItems(await listHistoryRequests()); }
+    catch (e) { onError((e as Error).message); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    const h = () => { void refresh(); };
+    window.addEventListener("requests:history-refresh", h);
+    return () => window.removeEventListener("requests:history-refresh", h);
+  }, []);
+
+  const remove = async (id: string) => {
+    const prev = items;
+    setItems((p) => (p ? p.filter((r) => r.id !== id) : p));
+    try { await deleteRequest(id); onOk("History entry deleted."); }
+    catch (e) { onError((e as Error).message); setItems(prev); }
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-bold text-navy">Request History <span className="text-muted-foreground">({items?.length ?? 0})</span></h2>
+          <p className="text-xs text-muted-foreground">Approved and declined requests. Newest first.</p>
+        </div>
+        <button onClick={refresh} className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:bg-secondary">Refresh</button>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        {loading && Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="h-14 animate-pulse rounded-lg bg-secondary/70" />
+        ))}
+        {!loading && items && items.length === 0 && (
+          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+            No decisions yet.
+          </div>
+        )}
+        {!loading && items && items.map((r) => {
+          const decidedTs = r.decidedAt?.toDate?.() ?? r.createdAt?.toDate?.();
+          const isApproved = r.status === "Approved";
+          return (
+            <div key={r.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/30 px-3 py-2.5">
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold text-navy" title={r.text}>{r.text}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {decidedTs?.toLocaleString() ?? "—"} ·{" "}
+                  <span className={`font-semibold ${isApproved ? "text-success" : "text-destructive"}`}>{r.status}</span>
+                </div>
+              </div>
+              <button onClick={() => remove(r.id)} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10" aria-label="Delete">
+                <FaTrash className="h-3 w-3" />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 

@@ -7,16 +7,39 @@ export interface RoutedUploadResult {
   bytes: number;
 }
 
+/** Probe audio duration in the background using an object URL. Never throws. */
+function probeDuration(file: File): Promise<number> {
+  return new Promise((resolve) => {
+    try {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement("audio");
+      a.preload = "metadata";
+      a.src = url;
+      const done = (d: number) => {
+        URL.revokeObjectURL(url);
+        resolve(Number.isFinite(d) ? d : 0);
+      };
+      a.onloadedmetadata = () => done(a.duration);
+      a.onerror = () => done(0);
+      setTimeout(() => done(a.duration || 0), 8000);
+    } catch {
+      resolve(0);
+    }
+  });
+}
+
 /**
- * Routes uploads across Cloudinary and Supabase Storage using a round-robin
- * strategy based on the current item count. Falls over to the other provider
- * on failure. Only one provider stores the file; only one URL is returned.
+ * Routes uploads across Cloudinary and Supabase Storage using round-robin.
+ * Falls over to the other provider on failure. Duration is probed in
+ * parallel with the upload so we never block the network on it.
  */
 export async function uploadAudioBalanced(
   file: File,
   currentCount: number,
   onProgress?: (pct: number) => void,
 ): Promise<RoutedUploadResult> {
+  const durationPromise = probeDuration(file);
+
   const providers = [
     async () => {
       const r = await uploadAudioToCloudinary(file, onProgress);
@@ -34,7 +57,9 @@ export async function uploadAudioBalanced(
   let lastErr: unknown;
   for (const run of order) {
     try {
-      return await run();
+      const res = await run();
+      if (!res.duration) res.duration = await durationPromise;
+      return res;
     } catch (e) {
       lastErr = e;
     }
