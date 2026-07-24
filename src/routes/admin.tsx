@@ -499,3 +499,39 @@ function HistoryPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (
 }
 
 
+
+function MaintenanceToggle({ email, onError, onOk }: { email: string; onError: (m: string) => void; onOk: (m: string) => void }) {
+  const { enabled } = useMaintenance();
+  const [busy, setBusy] = useState(false);
+
+  const toggle = async () => {
+    const next = !enabled;
+    if (next && !confirm("Enable Maintenance Mode? The public website will be disabled for non-admin visitors.")) return;
+    setBusy(true);
+    try {
+      await setMaintenance(next, email);
+      onOk(next ? "Maintenance Mode enabled." : "Maintenance Mode disabled.");
+    } catch (e) {
+      onError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      disabled={busy}
+      className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 ${
+        enabled
+          ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20"
+          : "border-border bg-card text-navy hover:bg-secondary"
+      }`}
+      aria-pressed={enabled}
+      title={enabled ? "Maintenance Mode is ON — click to disable" : "Maintenance Mode is OFF — click to enable"}
+    >
+      <FaPowerOff className="h-3.5 w-3.5" />
+      Maintenance: {enabled ? "ON" : "OFF"}
+    </button>
+  );
+}
