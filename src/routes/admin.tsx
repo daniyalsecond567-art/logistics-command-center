@@ -180,8 +180,9 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
         </div>
       </div>
 
-      <div className="container-max pb-10">
-        <RequestsPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+      <div className="container-max grid gap-6 pb-10 lg:grid-cols-2">
+        <PendingPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+        <HistoryPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
       </div>
 
 
