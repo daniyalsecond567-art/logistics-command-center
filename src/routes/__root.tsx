@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Outlet,
   Link,
   createRootRouteWithContext,
   useRouter,
@@ -15,6 +14,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TermsGate } from "@/components/layout/TermsGate";
+import { MaintenanceProvider } from "@/contexts/MaintenanceContext";
+import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
 
 function NotFoundComponent() {
   return (
@@ -135,14 +136,16 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="flex min-h-screen flex-col">
-          <Navbar />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <Footer />
-        </div>
-        <TermsGate />
+        <MaintenanceProvider>
+          <div className="flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1">
+              <MaintenanceGate />
+            </main>
+            <Footer />
+          </div>
+          <TermsGate />
+        </MaintenanceProvider>
 
       </AuthProvider>
     </QueryClientProvider>

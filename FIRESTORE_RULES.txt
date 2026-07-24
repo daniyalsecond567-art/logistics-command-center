@@ -60,6 +60,15 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
+    // Site configuration (maintenance mode toggle, etc.)
+    // Public read (so the app can gate the UI) · Admin write only
+    // ---------------------------------------------------------------
+    match /siteConfig/{docId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // ---------------------------------------------------------------
     // Default deny — every other path is closed until an explicit
     // block above allows it.
     // ---------------------------------------------------------------

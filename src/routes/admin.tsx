@@ -12,8 +12,10 @@ import {
 } from "@/services/trainingService";
 import { uploadAudioBalanced } from "@/lib/uploadRouter";
 import { decideRequest, deleteRequest, listHistoryRequests, listPendingRequests, type UserRequest } from "@/services/requestService";
-import { FaCheck, FaTimes } from "react-icons/fa";
+import { FaCheck, FaTimes, FaPowerOff } from "react-icons/fa";
 import { formatBytes, formatDuration } from "@/utils/format";
+import { setMaintenance } from "@/services/maintenanceService";
+import { useMaintenance } from "@/contexts/MaintenanceContext";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -127,9 +129,12 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
             <h1 className="mt-1 font-display text-2xl font-bold text-navy">Training resources</h1>
             <p className="text-xs text-muted-foreground">Signed in as {email}</p>
           </div>
-          <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-navy hover:bg-secondary">
-            <FaSignOutAlt /> Sign out
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <MaintenanceToggle email={email} onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+            <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-navy hover:bg-secondary">
+              <FaSignOutAlt /> Sign out
+            </button>
+          </div>
         </div>
       </div>
 
@@ -494,3 +499,39 @@ function HistoryPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (
 }
 
 
+
+function MaintenanceToggle({ email, onError, onOk }: { email: string; onError: (m: string) => void; onOk: (m: string) => void }) {
+  const { enabled } = useMaintenance();
+  const [busy, setBusy] = useState(false);
+
+  const toggle = async () => {
+    const next = !enabled;
+    if (next && !confirm("Enable Maintenance Mode? The public website will be disabled for non-admin visitors.")) return;
+    setBusy(true);
+    try {
+      await setMaintenance(next, email);
+      onOk(next ? "Maintenance Mode enabled." : "Maintenance Mode disabled.");
+    } catch (e) {
+      onError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={toggle}
+      disabled={busy}
+      className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 ${
+        enabled
+          ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20"
+          : "border-border bg-card text-navy hover:bg-secondary"
+      }`}
+      aria-pressed={enabled}
+      title={enabled ? "Maintenance Mode is ON — click to disable" : "Maintenance Mode is OFF — click to enable"}
+    >
+      <FaPowerOff className="h-3.5 w-3.5" />
+      Maintenance: {enabled ? "ON" : "OFF"}
+    </button>
+  );
+}
