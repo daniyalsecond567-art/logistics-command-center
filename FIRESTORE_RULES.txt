@@ -54,11 +54,9 @@ service cloud.firestore {
         request.resource.data.text.size() <= 20 &&
         request.resource.data.status == 'Pending';
 
-      // Only administrators (authenticated users) can view or remove requests.
-      allow read, delete: if request.auth != null;
-
-      // Requests are immutable — no client-side editing.
-      allow update: if false;
+      // Only administrators (authenticated users) can view, update, or remove requests.
+      // Updates are used to record Approved / Declined decisions with a timestamp.
+      allow read, update, delete: if request.auth != null;
     }
 
     // ---------------------------------------------------------------
