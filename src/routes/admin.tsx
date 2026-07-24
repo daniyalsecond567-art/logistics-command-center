@@ -11,7 +11,8 @@ import {
   type TrainingAudio,
 } from "@/services/trainingService";
 import { uploadAudioBalanced } from "@/lib/uploadRouter";
-import { deleteRequest, listRequests, type UserRequest } from "@/services/requestService";
+import { decideRequest, deleteRequest, listHistoryRequests, listPendingRequests, type UserRequest } from "@/services/requestService";
+import { FaCheck, FaTimes } from "react-icons/fa";
 import { formatBytes, formatDuration } from "@/utils/format";
 
 export const Route = createFileRoute("/admin")({
