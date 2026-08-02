@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Reveal } from "@/components/fx/Reveal";
+
 
 interface Props {
   eyebrow: string;

@@ -137,17 +137,22 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <MaintenanceProvider>
+          <CinematicBackground />
           <div className="flex min-h-screen flex-col">
             <Navbar />
             <main className="flex-1">
-              <MaintenanceGate />
+              <RouteTransition>
+                <MaintenanceGate />
+              </RouteTransition>
             </main>
             <Footer />
           </div>
           <TermsGate />
+          <Preloader />
         </MaintenanceProvider>
 
       </AuthProvider>
     </QueryClientProvider>
   );
 }
+
