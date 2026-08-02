@@ -132,3 +132,170 @@
   @media (min-width: 768px) { padding-inline: 2rem; }
   @media (min-width: 1280px) { padding-inline: 3rem; }
 }
+
+/* ============================================================
+   2050 CINEMATIC LAYER — visual only, no layout ownership
+   ============================================================ */
+
+html, body { overflow-x: hidden; }
+
+@keyframes fx-lane-run {
+  0%   { transform: translate3d(-30%, 0, 0) scaleX(0.6); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translate3d(130%, 0, 0) scaleX(1); opacity: 0; }
+}
+@keyframes fx-mote-drift {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  20%  { opacity: 0.7; }
+  80%  { opacity: 0.5; }
+  100% { transform: translate3d(40px, -120px, 0); opacity: 0; }
+}
+@keyframes fx-sweep {
+  0%   { transform: translate3d(-100%, 0, 0); opacity: 0.9; }
+  100% { transform: translate3d(200%, 0, 0); opacity: 0; }
+}
+@keyframes fx-page-in {
+  from { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.995); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fx-bar {
+  0%   { transform: translate3d(-100%, 0, 0); }
+  100% { transform: translate3d(100%, 0, 0); }
+}
+@keyframes fx-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@keyframes fx-roll {
+  to { transform: rotate(360deg); }
+}
+@keyframes fx-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -8px, 0); }
+}
+
+.fx-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black, transparent 78%);
+}
+
+.fx-lane {
+  position: absolute;
+  left: 0;
+  height: 2px;
+  width: 34%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary-glow) 70%, transparent), transparent);
+  animation: fx-lane-run linear infinite;
+  will-change: transform, opacity;
+}
+
+.fx-mote {
+  position: absolute;
+  height: 4px;
+  width: 4px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--accent) 75%, transparent);
+  box-shadow: 0 0 10px color-mix(in oklab, var(--accent) 60%, transparent);
+  animation: fx-mote-drift linear infinite;
+  will-change: transform, opacity;
+}
+
+.fx-route-sweep {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in oklab, var(--primary-glow) 22%, transparent) 45%,
+    color-mix(in oklab, var(--primary-glow) 45%, transparent) 50%,
+    transparent 100%
+  );
+  animation: fx-sweep 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.fx-page-enter { animation: fx-page-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.fx-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--gradient-hero);
+  transition: opacity 650ms ease, visibility 650ms ease;
+}
+.fx-preloader-out { opacity: 0; visibility: hidden; }
+.fx-preloader-bar {
+  display: block;
+  height: 100%;
+  width: 55%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
+  animation: fx-bar 1.1s ease-in-out infinite;
+}
+
+.fx-blueprint {
+  position: relative;
+  height: 78px;
+  width: 100%;
+  animation: fx-float 3.4s ease-in-out infinite;
+}
+.fx-blueprint span {
+  position: absolute;
+  border: 1.5px solid color-mix(in oklab, white 70%, transparent);
+  animation: fx-draw 1.1s ease-out both;
+}
+.fx-blueprint-cab {
+  left: 4%; bottom: 16px; height: 40px; width: 22%;
+  border-radius: 8px 10px 2px 2px;
+}
+.fx-blueprint-trailer {
+  left: 28%; bottom: 16px; height: 52px; width: 66%;
+  border-radius: 4px;
+  animation-delay: 180ms !important;
+}
+.fx-blueprint-wheel {
+  bottom: 2px; height: 18px; width: 18px; border-radius: 999px;
+  animation: fx-roll 1.6s linear infinite !important;
+}
+
+/* Premium interaction responses */
+@utility hover-lift {
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 320ms ease;
+  &:hover { transform: translate3d(0, -4px, 0); box-shadow: var(--shadow-elevated); }
+}
+@utility hover-tilt {
+  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 380ms ease;
+  &:hover { transform: perspective(900px) rotateX(2deg) rotateY(-2deg) translate3d(0, -5px, 0); box-shadow: var(--shadow-elevated); }
+}
+@utility glass-panel {
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+}
+
+/* Site-wide premium polish, applied without changing markup */
+main a, main button { transition: color 220ms ease, background-color 220ms ease, transform 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease, opacity 220ms ease; }
+main img { transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms ease; }
+
+@media (hover: hover) and (min-width: 1024px) {
+  main button:hover:not(:disabled) { transform: translate3d(0, -2px, 0); }
+  main .shadow-card:hover img,
+  main .shadow-elevated:hover img { transform: scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-lane, .fx-mote, .fx-blueprint, .fx-blueprint span, .fx-page-enter, .fx-route-sweep {
+    animation: none !important;
+  }
+}
+
