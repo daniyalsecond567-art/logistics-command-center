@@ -16,6 +16,10 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { TermsGate } from "@/components/layout/TermsGate";
 import { MaintenanceProvider } from "@/contexts/MaintenanceContext";
 import { MaintenanceGate } from "@/components/layout/MaintenanceGate";
+import { CinematicBackground } from "@/components/fx/CinematicBackground";
+import { RouteTransition } from "@/components/fx/RouteTransition";
+import { Preloader } from "@/components/fx/Preloader";
+
 
 function NotFoundComponent() {
   return (
