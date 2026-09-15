@@ -12,7 +12,7 @@ import {
 } from "@/services/trainingService";
 import { uploadAudioBalanced } from "@/lib/uploadRouter";
 import { decideRequest, deleteRequest, listHistoryRequests, listPendingRequests, type UserRequest } from "@/services/requestService";
-import { FaCheck, FaTimes, FaPowerOff } from "react-icons/fa";
+import { FaCheck, FaTimes, FaPowerOff, FaLink } from "react-icons/fa";
 import { formatBytes, formatDuration } from "@/utils/format";
 import { setMaintenance } from "@/services/maintenanceService";
 import { useMaintenance } from "@/contexts/MaintenanceContext";
@@ -211,6 +211,8 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
 
 function UploadPanel({ onUploaded, onError, nextOrder }: { onUploaded: () => Promise<void>; onError: (m: string) => void; nextOrder: number }) {
   const [file, setFile] = useState<File | null>(null);
+  const [mode, setMode] = useState<"file" | "url">("file");
+  const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [progress, setProgress] = useState(0);
@@ -218,20 +220,34 @@ function UploadPanel({ onUploaded, onError, nextOrder }: { onUploaded: () => Pro
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!file) return onError("Choose an audio file first.");
-    if (!file.type.startsWith("audio/")) return onError("Only audio files are supported.");
     setBusy(true);
     setProgress(0);
     try {
-      const res = await uploadAudioBalanced(file, nextOrder - 1, setProgress);
+      let audioUrl: string;
+      let duration = 0;
+
+      if (mode === "url") {
+        const clean = url.trim();
+        if (!/^https?:\/\/\S+$/i.test(clean)) throw new Error("Enter a valid http(s) audio link.");
+        if (/youtube\.com|youtu\.be/i.test(clean))
+          throw new Error("YouTube links can't be added. Paste a direct .mp3 / .m4a / .wav link.");
+        audioUrl = clean;
+      } else {
+        if (!file) throw new Error("Choose an audio file first.");
+        if (!file.type.startsWith("audio/")) throw new Error("Only audio files are supported.");
+        const res = await uploadAudioBalanced(file, nextOrder - 1, setProgress);
+        audioUrl = res.audioUrl;
+        duration = res.duration;
+      }
+
       await createTraining({
         title: title.trim(),
         description: desc.trim(),
-        audioUrl: res.audioUrl,
-        duration: res.duration,
+        audioUrl,
+        duration,
         displayOrder: nextOrder,
       });
-      setFile(null); setTitle(""); setDesc(""); setProgress(0);
+      setFile(null); setUrl(""); setTitle(""); setDesc(""); setProgress(0);
       await onUploaded();
     } catch (err) {
       onError((err as Error).message);
@@ -246,21 +262,51 @@ function UploadPanel({ onUploaded, onError, nextOrder }: { onUploaded: () => Pro
         <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary-gradient text-primary-foreground"><FaCloudUploadAlt className="h-5 w-5" /></span>
         <div>
           <h2 className="font-display text-lg font-bold text-navy">Upload new brief</h2>
-          <p className="text-xs text-muted-foreground">Audio uploads go to Cloudinary. Metadata is saved to Firestore.</p>
+          <p className="text-xs text-muted-foreground">Upload an audio file or add one by link. Metadata is saved to Firestore.</p>
         </div>
       </div>
 
-      <label
-        htmlFor="file"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) setFile(f); }}
-        className="mt-5 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-secondary/40 p-8 text-center transition-colors hover:border-primary hover:bg-secondary"
-      >
-        <FaCloudUploadAlt className="h-8 w-8 text-primary" />
-        <div className="text-sm font-semibold text-navy">{file ? file.name : "Drag MP3 here or click to browse"}</div>
-        <div className="text-xs text-muted-foreground">{file ? formatBytes(file.size) : "MP3, M4A, WAV, OGG"}</div>
-        <input id="file" type="file" accept="audio/*" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-      </label>
+      <div className="mt-5 grid grid-cols-2 gap-1 rounded-xl bg-secondary/60 p-1">
+        {(["file", "url"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setMode(m)}
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+              mode === m ? "bg-card text-navy shadow-card" : "text-muted-foreground hover:text-navy"
+            }`}
+          >
+            {m === "file" ? <><FaCloudUploadAlt className="h-3.5 w-3.5" /> Upload file</> : <><FaLink className="h-3 w-3" /> Enter URL</>}
+          </button>
+        ))}
+      </div>
+
+      {mode === "url" ? (
+        <label className="mt-4 block text-sm">
+          <span className="mb-1 block font-medium text-navy">Audio link</span>
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com/brief.mp3"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+          <span className="mt-1 block text-xs text-muted-foreground">Direct .mp3 / .m4a / .wav link. YouTube links are not supported.</span>
+        </label>
+      ) : (
+        <label
+          htmlFor="file"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) setFile(f); }}
+          className="mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-secondary/40 p-8 text-center transition-colors hover:border-primary hover:bg-secondary"
+        >
+          <FaCloudUploadAlt className="h-8 w-8 text-primary" />
+          <div className="text-sm font-semibold text-navy">{file ? file.name : "Drag MP3 here or click to browse"}</div>
+          <div className="text-xs text-muted-foreground">{file ? formatBytes(file.size) : "MP3, M4A, WAV, OGG"}</div>
+          <input id="file" type="file" accept="audio/*" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        </label>
+      )}
+
 
       <label className="mt-4 block text-sm">
         <span className="mb-1 flex items-center justify-between font-medium text-navy">
