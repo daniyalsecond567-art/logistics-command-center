@@ -70,6 +70,15 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null;
     }
 
+    // Training favourites — each signed-in user can only touch their own doc.
+    match /userFavorites/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly(['ids', 'updatedAt']) &&
+        request.resource.data.ids is list &&
+        request.resource.data.ids.size() <= 1000;
+    }
+
     // ---------------------------------------------------------------
     // Site configuration (maintenance mode toggle, etc.)
     // Public read (so the app can gate the UI) · Admin write only
