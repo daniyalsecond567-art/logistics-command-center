@@ -37,6 +37,17 @@ export async function createRequest(text: string) {
   });
 }
 
+export async function createIssue(text: string) {
+  const clean = text.trim().slice(0, 300);
+  if (!clean) throw new Error("Please describe the issue.");
+  const { db } = getFirebase();
+  await addDoc(collection(db, "userIssues"), {
+    text: clean,
+    status: "Open",
+    createdAt: serverTimestamp(),
+  });
+}
+
 export async function listRequests(): Promise<UserRequest[]> {
   const { db } = getFirebase();
   const q = query(collection(db, COLL), orderBy("createdAt", "desc"));
