@@ -59,6 +59,17 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null;
     }
 
+    // Issue reports from the Training page. Public create, admin read/delete.
+    match /userIssues/{docId} {
+      allow create: if
+        request.resource.data.keys().hasOnly(['text', 'status', 'createdAt']) &&
+        request.resource.data.text is string &&
+        request.resource.data.text.size() > 0 &&
+        request.resource.data.text.size() <= 300 &&
+        request.resource.data.status == 'Open';
+      allow read, update, delete: if request.auth != null;
+    }
+
     // ---------------------------------------------------------------
     // Site configuration (maintenance mode toggle, etc.)
     // Public read (so the app can gate the UI) · Admin write only
