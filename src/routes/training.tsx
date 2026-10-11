@@ -56,6 +56,22 @@ function TrainingPage() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <FaClipboardList /> Internal driver resources — for company personnel only.
           </div>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-card">
+            {([["all", "All"], ["favs", "Favourites"]] as const).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key)}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-navy"
+                }`}
+              >
+                {key === "favs" && <FaHeart className="h-3 w-3" />}
+                {label}
+                {key === "favs" && favourites.size > 0 && <span>({favourites.size})</span>}
+              </button>
+            ))}
+          </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
               <FaSearch className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
