@@ -116,18 +116,28 @@ function TrainingPage() {
 
         {filtered && filtered.length === 0 && (
           <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-card">
-            <FaHeadphonesAlt className="mx-auto h-8 w-8 text-primary" />
-            <h3 className="mt-3 font-display text-base font-bold text-navy">No briefs yet</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Admins can upload briefs from the <a href="/admin" className="font-semibold text-primary">Admin Portal</a>.
-            </p>
+            {tab === "favs" ? (
+              <>
+                <FaRegHeart className="mx-auto h-8 w-8 text-primary" />
+                <h3 className="mt-3 font-display text-base font-bold text-navy">No favourites yet</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Tap the heart on any brief to save it here.</p>
+              </>
+            ) : (
+              <>
+                <FaHeadphonesAlt className="mx-auto h-8 w-8 text-primary" />
+                <h3 className="mt-3 font-display text-base font-bold text-navy">No briefs yet</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Admins can upload briefs from the <a href="/admin" className="font-semibold text-primary">Admin Portal</a>.
+                </p>
+              </>
+            )}
           </div>
         )}
 
         {filtered && filtered.length > 0 && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((t) => (
-              <BriefCard key={t.id} item={t} />
+              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={() => toggle(t.id)} />
             ))}
           </div>
         )}
