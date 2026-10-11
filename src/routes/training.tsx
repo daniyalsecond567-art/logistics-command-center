@@ -25,6 +25,8 @@ function TrainingPage() {
   const [showIssue, setShowIssue] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [tab, setTab] = useState<"all" | "favs">("all");
+  const { favourites, isFavourite, toggle } = useFavourites();
 
   useEffect(() => {
     let alive = true;
@@ -36,10 +38,11 @@ function TrainingPage() {
 
   const filtered = useMemo(() => {
     if (!items) return null;
+    let list = tab === "favs" ? items.filter((i) => favourites.has(i.id)) : items;
     const s = q.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter((i) => i.title.toLowerCase().includes(s) || i.description.toLowerCase().includes(s));
-  }, [items, q]);
+    if (s) list = list.filter((i) => i.title.toLowerCase().includes(s) || i.description.toLowerCase().includes(s));
+    return list;
+  }, [items, q, tab, favourites]);
 
   return (
     <div>
