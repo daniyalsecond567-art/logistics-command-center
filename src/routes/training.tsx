@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList, FaPlus, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList, FaPlus, FaTimes, FaCheckCircle, FaExclamationTriangle, FaHeart, FaRegHeart } from "react-icons/fa";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { listTraining, type TrainingAudio } from "@/services/trainingService";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { useFavourites } from "@/hooks/useFavourites";
 import { createRequest, createIssue } from "@/services/requestService";
 
 
