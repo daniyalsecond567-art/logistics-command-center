@@ -79,6 +79,27 @@ service cloud.firestore {
         request.resource.data.ids.size() <= 1000;
     }
 
+    // Songs added from the Training page (YouTube embeds). Public read,
+    // public validated create (doc id = yt_<videoId> blocks duplicates,
+    // since existing docs can't be overwritten). Admin delete only.
+    match /trainingSongs/{docId} {
+      allow read: if true;
+      allow create: if
+        request.resource.data.keys().hasOnly(['title', 'sourceUrl', 'videoId', 'type', 'creatorId', 'createdAt']) &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.title.size() <= 60 &&
+        request.resource.data.type == 'youtube' &&
+        request.resource.data.videoId is string &&
+        request.resource.data.videoId.matches('^[A-Za-z0-9_-]{11}$') &&
+        docId == 'yt_' + request.resource.data.videoId &&
+        request.resource.data.sourceUrl == 'https://www.youtube.com/watch?v=' + request.resource.data.videoId &&
+        request.resource.data.creatorId is string &&
+        request.resource.data.creatorId.size() <= 128 &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if request.auth != null;
+    }
+
     // ---------------------------------------------------------------
     // Site configuration (maintenance mode toggle, etc.)
     // Public read (so the app can gate the UI) · Admin write only

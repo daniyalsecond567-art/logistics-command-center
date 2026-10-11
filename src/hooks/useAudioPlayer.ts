@@ -3,6 +3,13 @@ import { useEffect, useRef, useState, useCallback } from "react";
 // Global registry — ensures only ONE audio plays at a time across the app.
 const registry = new Set<HTMLAudioElement>();
 
+/** Pause every native audio element (used when an embedded player starts). */
+export function pauseAllAudio() {
+  registry.forEach((a) => { if (!a.paused) a.pause(); });
+}
+/** Fired when native audio starts so embedded players can stop. */
+export const AUDIO_PLAY_EVENT = "trucking1:audio-play";
+
 /**
  * Audio elements are created lazily on the first user click (inside the
  * gesture), with preload="none". Creating one eagerly per card made browsers
@@ -70,6 +77,7 @@ export function useAudioPlayer(src: string) {
       if (other !== a && !other.paused) other.pause();
     });
     setPlaying(true);
+    window.dispatchEvent(new CustomEvent(AUDIO_PLAY_EVENT, { detail: src }));
     try {
       await a.play();
     } catch (err) {
@@ -79,7 +87,7 @@ export function useAudioPlayer(src: string) {
         console.warn("Audio playback blocked:", (err as Error)?.message);
       }
     }
-  }, [ensureAudio]);
+  }, [ensureAudio, src]);
 
   const pause = useCallback(() => {
     audioRef.current?.pause();
