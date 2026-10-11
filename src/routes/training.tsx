@@ -286,7 +286,7 @@ function IssueModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function BriefCard({ item }: { item: TrainingAudio }) {
+function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favourite: boolean; onToggleFav: () => void }) {
   const { playing, toggle } = useAudioPlayer(item.audioUrl);
 
   return (
