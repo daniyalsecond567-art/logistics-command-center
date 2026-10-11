@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList, FaPlus, FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaPlay, FaPause, FaHeadphonesAlt, FaSearch, FaClipboardList, FaPlus, FaTimes, FaCheckCircle, FaExclamationTriangle, FaHeart, FaRegHeart } from "react-icons/fa";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { listTraining, type TrainingAudio } from "@/services/trainingService";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { useFavourites } from "@/hooks/useFavourites";
 import { createRequest, createIssue } from "@/services/requestService";
 
 
@@ -24,6 +25,8 @@ function TrainingPage() {
   const [showIssue, setShowIssue] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [tab, setTab] = useState<"all" | "favs">("all");
+  const { favourites, isFavourite, toggle } = useFavourites();
 
   useEffect(() => {
     let alive = true;
@@ -35,10 +38,11 @@ function TrainingPage() {
 
   const filtered = useMemo(() => {
     if (!items) return null;
+    let list = tab === "favs" ? items.filter((i) => favourites.has(i.id)) : items;
     const s = q.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter((i) => i.title.toLowerCase().includes(s) || i.description.toLowerCase().includes(s));
-  }, [items, q]);
+    if (s) list = list.filter((i) => i.title.toLowerCase().includes(s) || i.description.toLowerCase().includes(s));
+    return list;
+  }, [items, q, tab, favourites]);
 
   return (
     <div>
@@ -51,6 +55,22 @@ function TrainingPage() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <FaClipboardList /> Internal driver resources — for company personnel only.
+          </div>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-card">
+            {([["all", "All"], ["favs", "Favourites"]] as const).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key)}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-navy"
+                }`}
+              >
+                {key === "favs" && <FaHeart className="h-3 w-3" />}
+                {label}
+                {key === "favs" && favourites.size > 0 && <span>({favourites.size})</span>}
+              </button>
+            ))}
           </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
@@ -96,18 +116,28 @@ function TrainingPage() {
 
         {filtered && filtered.length === 0 && (
           <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-card">
-            <FaHeadphonesAlt className="mx-auto h-8 w-8 text-primary" />
-            <h3 className="mt-3 font-display text-base font-bold text-navy">No briefs yet</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Admins can upload briefs from the <a href="/admin" className="font-semibold text-primary">Admin Portal</a>.
-            </p>
+            {tab === "favs" ? (
+              <>
+                <FaRegHeart className="mx-auto h-8 w-8 text-primary" />
+                <h3 className="mt-3 font-display text-base font-bold text-navy">No favourites yet</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Tap the heart on any brief to save it here.</p>
+              </>
+            ) : (
+              <>
+                <FaHeadphonesAlt className="mx-auto h-8 w-8 text-primary" />
+                <h3 className="mt-3 font-display text-base font-bold text-navy">No briefs yet</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Admins can upload briefs from the <a href="/admin" className="font-semibold text-primary">Admin Portal</a>.
+                </p>
+              </>
+            )}
           </div>
         )}
 
         {filtered && filtered.length > 0 && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((t) => (
-              <BriefCard key={t.id} item={t} />
+              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={() => toggle(t.id)} />
             ))}
           </div>
         )}
@@ -256,7 +286,7 @@ function IssueModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function BriefCard({ item }: { item: TrainingAudio }) {
+function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favourite: boolean; onToggleFav: () => void }) {
   const { playing, toggle } = useAudioPlayer(item.audioUrl);
 
   return (
@@ -273,6 +303,17 @@ function BriefCard({ item }: { item: TrainingAudio }) {
           <div className="truncate text-[11px] text-muted-foreground" title={item.description}>{item.description}</div>
         )}
       </div>
+      <button
+        type="button"
+        onClick={onToggleFav}
+        aria-label={favourite ? "Remove from favourites" : "Add to favourites"}
+        aria-pressed={favourite}
+        className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${
+          favourite ? "text-destructive" : "text-muted-foreground hover:text-destructive"
+        }`}
+      >
+        {favourite ? <FaHeart className="h-3.5 w-3.5" /> : <FaRegHeart className="h-3.5 w-3.5" />}
+      </button>
       <button
         type="button"
         onClick={toggle}
