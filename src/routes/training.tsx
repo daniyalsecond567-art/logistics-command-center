@@ -305,6 +305,17 @@ function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favo
       </div>
       <button
         type="button"
+        onClick={onToggleFav}
+        aria-label={favourite ? "Remove from favourites" : "Add to favourites"}
+        aria-pressed={favourite}
+        className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${
+          favourite ? "text-destructive" : "text-muted-foreground hover:text-destructive"
+        }`}
+      >
+        {favourite ? <FaHeart className="h-3.5 w-3.5" /> : <FaRegHeart className="h-3.5 w-3.5" />}
+      </button>
+      <button
+        type="button"
         onClick={toggle}
         aria-label={playing ? "Pause" : "Play"}
         className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${
