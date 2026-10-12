@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, setDoc, type Timestamp } from "firebase/firestore";
+import { collection, deleteDoc, updateDoc, doc, getDoc, getDocs, orderBy, query, serverTimestamp, setDoc, type Timestamp } from "firebase/firestore";
 import { getFirebase } from "@/lib/firebase";
 import { getAnonId } from "@/services/favouritesService";
 
@@ -56,4 +56,16 @@ export async function addSong(url: string, title: string): Promise<TrainingSong>
   };
   await setDoc(ref, data);
   return { id: ref.id, ...data, createdAt: null };
+}
+
+export async function renameSong(id: string, title: string) {
+  const clean = title.trim();
+  if (!clean || clean.length > 60) throw new Error("Title must be 1–60 characters.");
+  const { db } = getFirebase();
+  await updateDoc(doc(db, COLL, id), { title: clean });
+}
+
+export async function deleteSong(id: string) {
+  const { db } = getFirebase();
+  await deleteDoc(doc(db, COLL, id));
 }
