@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 const SEEN_KEY = "trucking1.preloader.v1";
 
@@ -10,8 +11,10 @@ const SEEN_KEY = "trucking1.preloader.v1";
 export function Preloader() {
   const [active, setActive] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reducedMotion) return;
     let seen = true;
     try {
       seen = sessionStorage.getItem(SEEN_KEY) === "1";
@@ -32,9 +35,9 @@ export function Preloader() {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
     };
-  }, []);
+  }, [reducedMotion]);
 
-  if (!active) return null;
+  if (!active || reducedMotion) return null;
 
   return (
     <div

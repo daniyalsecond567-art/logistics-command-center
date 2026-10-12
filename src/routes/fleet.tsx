@@ -11,6 +11,10 @@ import carrierImg from "@/assets/truck-carrier.jpg";
 export const Route = createFileRoute("/fleet")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Fleet Management | Trucking-1" },
+      { property: "og:description", content: "2,417 power units, 3,102 trailers and 812 car-carriers under central telematics." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Fleet Management | Trucking-1" },
       { name: "description", content: "2,417 power units, 3,102 trailers and 812 car-carriers under central telematics." },
     ],

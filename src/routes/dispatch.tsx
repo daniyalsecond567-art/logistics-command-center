@@ -5,6 +5,10 @@ import { FaBroadcastTower, FaHeadset, FaMapMarkerAlt } from "react-icons/fa";
 export const Route = createFileRoute("/dispatch")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Live Dispatch Board | Trucking-1" },
+      { property: "og:description", content: "24/7 dispatch board with real-time truck tracking, load assignments and ETA management." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Live Dispatch Board | Trucking-1" },
       { name: "description", content: "24/7 dispatch board with real-time truck tracking, load assignments and ETA management." },
     ],

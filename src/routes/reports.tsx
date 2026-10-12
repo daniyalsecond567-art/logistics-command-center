@@ -4,6 +4,10 @@ import { PageHeader } from "@/components/layout/PageHeader";
 export const Route = createFileRoute("/reports")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Reports & Analytics | Trucking-1" },
+      { property: "og:description", content: "Revenue per mile, utilization, fuel and safety analytics across the fleet." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Reports & Analytics | Trucking-1" },
       { name: "description", content: "Revenue per mile, utilization, fuel and safety analytics across the fleet." },
     ],

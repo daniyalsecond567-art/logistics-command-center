@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep shared interaction timing and CSS reduced-motion overrides in `src/styles.css`, and gate JavaScript-driven visual effects with `useReducedMotion`; this prevents inconsistent accessibility behavior without changing application logic.

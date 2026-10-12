@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FaSignOutAlt, FaTrash, FaPencilAlt, FaCloudUploadAlt, FaCheckCircle, FaTimesCircle, FaSearch } from "react-icons/fa";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -22,6 +22,10 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
+      { property: "og:title", content: "Admin Portal | Trucking-1" },
+      { property: "og:description", content: "Trucking-1 administrator portal." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Admin Portal | Trucking-1" },
       { name: "description", content: "Trucking-1 administrator portal." },
       { name: "robots", content: "noindex" },
@@ -89,6 +93,7 @@ function AdminPage() {
 interface Toast { kind: "ok" | "err"; msg: string }
 
 function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => void }) {
+  const reducedMotion = useReducedMotion();
   const [items, setItems] = useState<TrainingAudio[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<Toast | null>(null);
@@ -199,9 +204,10 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
       <AnimatePresence>
         {toast && (
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
+            initial={{ y: reducedMotion ? 0 : 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
+            exit={{ y: reducedMotion ? 0 : 20, opacity: 0 }}
+            transition={{ duration: reducedMotion ? 0.1 : 0.24 }}
             className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold shadow-elevated ${
               toast.kind === "ok" ? "bg-success text-white" : "bg-destructive text-white"
             }`}

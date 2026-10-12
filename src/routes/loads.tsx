@@ -4,6 +4,10 @@ import { PageHeader } from "@/components/layout/PageHeader";
 export const Route = createFileRoute("/loads")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Load Board | Trucking-1" },
+      { property: "og:description", content: "Open freight loads across 48 states. Filter by weight, equipment and lane." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Load Board | Trucking-1" },
       { name: "description", content: "Open freight loads across 48 states. Filter by weight, equipment and lane." },
     ],

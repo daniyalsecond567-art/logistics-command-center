@@ -6,6 +6,10 @@ import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaHeadset } from "react-icons/f
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Contact Trucking-1 Dispatch" },
+      { property: "og:description", content: "Call our dispatch line 24/7 or send a message to our operations team." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Contact Trucking-1 Dispatch" },
       { name: "description", content: "Call our dispatch line 24/7 or send a message to our operations team." },
     ],
