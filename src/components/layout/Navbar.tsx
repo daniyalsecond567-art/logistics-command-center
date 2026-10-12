@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import logoUrl from "@/assets/logo.png";
 
 const links = [
@@ -19,6 +19,7 @@ const links = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const reducedMotion = useReducedMotion();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
@@ -49,7 +50,8 @@ export function Navbar() {
                 {l.label}
                 {active && (
                   <motion.span
-                    layoutId="nav-underline"
+                    layoutId={reducedMotion ? undefined : "nav-underline"}
+                    transition={{ duration: reducedMotion ? 0 : 0.24, ease: [0.16, 1, 0.3, 1] }}
                     className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-primary-gradient"
                   />
                 )}
@@ -86,9 +88,10 @@ export function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
+            initial={reducedMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            exit={reducedMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ duration: reducedMotion ? 0 : 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="xl:hidden overflow-hidden border-t border-border bg-background"
           >
             <div className="container-max flex flex-col gap-1 py-4">

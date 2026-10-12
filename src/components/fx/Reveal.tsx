@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useReducedMotion } from "framer-motion";
 
 interface Props {
   children: ReactNode;
@@ -14,10 +15,11 @@ interface Props {
 export function Reveal({ children, delay = 0, className }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
+    if (reducedMotion || !el || typeof IntersectionObserver === "undefined") {
       setShown(true);
       return;
     }
@@ -34,18 +36,18 @@ export function Reveal({ children, delay = 0, className }: Props) {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [reducedMotion]);
 
   return (
     <div
       ref={ref}
-      className={className}
+      className={`fx-reveal ${className ?? ""}`}
       data-revealed={shown ? "true" : "false"}
       style={{
-        opacity: shown ? 1 : 0,
-        transform: shown ? "none" : "translate3d(0, 22px, 0)",
-        transition: `opacity 700ms cubic-bezier(.16,1,.3,1) ${delay}ms, transform 700ms cubic-bezier(.16,1,.3,1) ${delay}ms`,
-        willChange: shown ? "auto" : "opacity, transform",
+        opacity: shown || reducedMotion ? 1 : 0,
+        transform: shown || reducedMotion ? "none" : "translate3d(0, 16px, 0)",
+        transition: reducedMotion ? "none" : `opacity 560ms cubic-bezier(.16,1,.3,1) ${delay}ms, transform 560ms cubic-bezier(.16,1,.3,1) ${delay}ms`,
+        willChange: shown || reducedMotion ? "auto" : "opacity, transform",
       }}
     >
       {children}
