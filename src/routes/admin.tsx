@@ -15,6 +15,7 @@ import { decideRequest, deleteRequest, listHistoryRequests, listPendingRequests,
 import { FaCheck, FaTimes, FaPowerOff, FaLink } from "react-icons/fa";
 import { formatBytes, formatDuration } from "@/utils/format";
 import { setMaintenance } from "@/services/maintenanceService";
+import { listSongs, renameSong, deleteSong, type TrainingSong } from "@/services/songService";
 import { useMaintenance } from "@/contexts/MaintenanceContext";
 
 export const Route = createFileRoute("/admin")({
@@ -183,6 +184,10 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
             </div>
           )}
         </div>
+      </div>
+
+      <div className="container-max pb-6">
+        <SongsPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
       </div>
 
       <div className="container-max grid gap-6 pb-10 lg:grid-cols-2">
@@ -579,5 +584,68 @@ function MaintenanceToggle({ email, onError, onOk }: { email: string; onError: (
       <FaPowerOff className="h-3.5 w-3.5" />
       Maintenance: {enabled ? "ON" : "OFF"}
     </button>
+  );
+}
+
+function SongsPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m: string) => void }) {
+  const [items, setItems] = useState<TrainingSong[] | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = async () => {
+    try { setItems(await listSongs()); } catch (e) { onError((e as Error).message); setItems([]); }
+  };
+  useEffect(() => { void load(); }, []);
+
+  const save = async (id: string) => {
+    setBusyId(id);
+    try { await renameSong(id, draft); setItems((p) => p?.map((s) => (s.id === id ? { ...s, title: draft.trim() } : s)) ?? p); setEditId(null); onOk("Song renamed."); }
+    catch (e) { onError((e as Error).message); }
+    finally { setBusyId(null); }
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Delete this song?")) return;
+    setBusyId(id);
+    try { await deleteSong(id); setItems((p) => p?.filter((s) => s.id !== id) ?? p); onOk("Song deleted."); }
+    catch (e) { onError((e as Error).message); }
+    finally { setBusyId(null); }
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <h2 className="font-display text-lg font-bold text-navy">YouTube songs <span className="text-muted-foreground">({items?.length ?? 0})</span></h2>
+      <div className="mt-4 space-y-2">
+        {!items && <div className="h-14 animate-pulse rounded-lg bg-secondary/70" />}
+        {items && items.length === 0 && (
+          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">No songs added yet.</div>
+        )}
+        {items?.map((s) => (
+          <div key={s.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/30 px-3 py-2.5">
+            <div className="min-w-0 flex-1">
+              {editId === s.id ? (
+                <input autoFocus maxLength={60} value={draft} onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") void save(s.id); if (e.key === "Escape") setEditId(null); }}
+                  className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary" />
+              ) : (
+                <div className="truncate text-sm font-semibold text-navy" title={s.title}>{s.title}</div>
+              )}
+              <a href={s.sourceUrl} target="_blank" rel="noreferrer" className="block truncate text-xs text-muted-foreground hover:text-primary">{s.sourceUrl}</a>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              {editId === s.id ? (
+                <>
+                  <button disabled={busyId === s.id} onClick={() => save(s.id)} className="grid h-9 w-9 place-items-center rounded-lg border border-success/30 text-success hover:bg-success/10" aria-label="Save"><FaCheck className="h-3.5 w-3.5" /></button>
+                  <button onClick={() => setEditId(null)} className="grid h-9 w-9 place-items-center rounded-lg border border-border text-navy hover:bg-secondary" aria-label="Cancel"><FaTimes className="h-3.5 w-3.5" /></button>
+                </>
+              ) : (
+                <button onClick={() => { setEditId(s.id); setDraft(s.title); }} className="grid h-9 w-9 place-items-center rounded-lg border border-border text-navy hover:bg-secondary" aria-label="Rename"><FaPencilAlt className="h-3.5 w-3.5" /></button>
+              )}
+              <button disabled={busyId === s.id} onClick={() => remove(s.id)} className="grid h-9 w-9 place-items-center rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10" aria-label="Delete"><FaTrash className="h-3.5 w-3.5" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

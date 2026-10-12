@@ -470,9 +470,11 @@ function SongCard({ item, favourite, onToggleFav }: { item: TrainingSong; favour
         </button>
       </div>
       {playing && (
-        <div className="mt-2 aspect-video w-full overflow-hidden rounded-md bg-navy">
+        <div aria-hidden="true" className="pointer-events-none fixed -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0">
           <iframe
-            className="h-full w-full"
+            width="200"
+            height="200"
+            tabIndex={-1}
             src={`https://www.youtube-nocookie.com/embed/${item.videoId}?autoplay=1&playsinline=1&rel=0`}
             title={item.title}
             allow="autoplay; encrypted-media; picture-in-picture"
