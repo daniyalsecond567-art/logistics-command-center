@@ -4,6 +4,10 @@ import { PageHeader } from "@/components/layout/PageHeader";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "About Trucking-1 | 18 Years Moving Freight" },
+      { property: "og:description", content: "Family-owned since 2007. 2,400+ trucks, 5,800+ drivers, 48-state operations." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "About Trucking-1 | 18 Years Moving Freight" },
       { name: "description", content: "Family-owned since 2007. 2,400+ trucks, 5,800+ drivers, 48-state operations." },
     ],

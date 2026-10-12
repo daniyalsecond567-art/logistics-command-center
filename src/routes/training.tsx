@@ -15,6 +15,10 @@ export const Route = createFileRoute("/training")({
   ssr: false,
   head: () => ({
     meta: [
+      { property: "og:title", content: "Driver Training Center | Trucking-1" },
+      { property: "og:description", content: "Driver safety, orientation and operations training briefs." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Driver Training Center | Trucking-1" },
       { name: "description", content: "Driver safety, orientation and operations training briefs." },
     ],

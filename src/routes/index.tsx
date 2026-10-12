@@ -18,6 +18,12 @@ import kenworthImg from "@/assets/truck-kenworth.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Trucking-1 | Enterprise Freight Dispatch & Fleet Portal" },
+      { property: "og:description", content: "Real-time dispatch, load board management and driver training for enterprise trucking fleets. 2,400+ trucks, 48 states, 24/7 operations." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://images.unsplash.com/photo-1616432043562-3671ea2e5242?auto=format&fit=crop&w=2400&q=80" },
+      { name: "twitter:image", content: "https://images.unsplash.com/photo-1616432043562-3671ea2e5242?auto=format&fit=crop&w=2400&q=80" },
       { title: "Trucking-1 | Enterprise Freight Dispatch & Fleet Portal" },
       {
         name: "description",

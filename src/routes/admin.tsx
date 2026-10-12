@@ -22,6 +22,10 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
+      { property: "og:title", content: "Admin Portal | Trucking-1" },
+      { property: "og:description", content: "Trucking-1 administrator portal." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Admin Portal | Trucking-1" },
       { name: "description", content: "Trucking-1 administrator portal." },
       { name: "robots", content: "noindex" },

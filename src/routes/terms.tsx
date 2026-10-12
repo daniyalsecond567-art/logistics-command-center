@@ -4,6 +4,10 @@ import { PageHeader } from "@/components/layout/PageHeader";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Terms & Conditions | Trucking-1" },
+      { property: "og:description", content: "Terms & Conditions and disclaimer for the Trucking-1 demonstration website." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Terms & Conditions | Trucking-1" },
       {
         name: "description",

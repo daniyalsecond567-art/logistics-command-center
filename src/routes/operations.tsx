@@ -5,6 +5,10 @@ import { FaTools, FaShieldAlt, FaClipboardCheck, FaExclamationTriangle } from "r
 export const Route = createFileRoute("/operations")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Operations Hub | Trucking-1" },
+      { property: "og:description", content: "Maintenance schedules, safety compliance, HOS oversight and yard operations." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Operations Hub | Trucking-1" },
       { name: "description", content: "Maintenance schedules, safety compliance, HOS oversight and yard operations." },
     ],
