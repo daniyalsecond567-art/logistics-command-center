@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   FaTruck,
   FaRoute,
@@ -66,6 +66,7 @@ function statusStyle(s: string) {
 }
 
 function HomePage() {
+  const reducedMotion = useReducedMotion();
   return (
     <div>
       {/* HERO */}
@@ -81,9 +82,9 @@ function HomePage() {
 
         <div className="container-max relative z-10 grid gap-12 py-20 lg:grid-cols-[1.2fr_1fr] lg:py-32">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: reducedMotion ? 0 : 0.7 }}
           >
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest">
               <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
@@ -127,9 +128,9 @@ function HomePage() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={reducedMotion ? false : { opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: reducedMotion ? 0 : 0.8, delay: reducedMotion ? 0 : 0.2 }}
             className="hidden lg:block"
           >
             <div className="rounded-2xl border border-white/15 bg-navy/70 p-6 backdrop-blur-xl shadow-elevated ring-1 ring-white/10">
@@ -213,10 +214,10 @@ function HomePage() {
           {fleetCards.map((f, i) => (
             <motion.div
               key={f.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ duration: reducedMotion ? 0 : 0.4, delay: reducedMotion ? 0 : i * 0.1 }}
               className="group overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-elevated"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-secondary">

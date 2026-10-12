@@ -336,6 +336,8 @@ main img { transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), filter 600
     will-change: auto !important;
   }
   .fx-page-enter, .hover-lift, .hover-tilt,
+  [class*="hover:-translate"]:hover, [class*="hover:scale"]:hover,
+  .group:hover [class*="group-hover:scale"],
   :where(a, button, [role="button"]):is(:hover, :active),
   .group:hover .transition-transform,
   main .shadow-card:hover img, main .shadow-elevated:hover img {
