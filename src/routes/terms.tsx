@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { DEFAULT_TERMS, DEFAULT_TERMS_DATE, getTerms, type TermsSection } from "@/services/termsService";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export const Route = createFileRoute("/terms")({
@@ -20,6 +22,15 @@ export const Route = createFileRoute("/terms")({
 });
 
 function TermsPage() {
+  const [sections, setSections] = useState<TermsSection[]>(DEFAULT_TERMS);
+  const [updated, setUpdated] = useState<Date>(DEFAULT_TERMS_DATE);
+  useEffect(() => {
+    getTerms().then((t) => {
+      if (!t) return;
+      setSections(t.sections);
+      if (t.updatedAt) setUpdated(t.updatedAt.toDate());
+    }).catch(() => { /* keep built-in terms */ });
+  }, []);
   return (
     <div>
       <PageHeader
@@ -29,65 +40,14 @@ function TermsPage() {
       />
       <section className="container-max py-10">
         <article className="mx-auto max-w-3xl space-y-6 rounded-2xl border border-border bg-card p-6 text-sm leading-relaxed text-foreground shadow-card sm:p-10">
-          <div>
-            <h2 className="font-display text-lg font-bold text-navy">1. Demonstration Notice</h2>
-            <p className="mt-2 text-muted-foreground">
-              This website ("Trucking-1") is a personal demonstration project created solely for
-              learning, user-interface demonstration, and entertainment purposes. It is
-              <strong className="text-navy"> not </strong>
-              an official trucking, logistics, freight, dispatch, transportation, or fleet
-              management platform, and it is not affiliated with any real carrier or operator.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-display text-lg font-bold text-navy">2. No Real Services</h2>
-            <p className="mt-2 text-muted-foreground">
-              No real dispatching, freight booking, carrier operations, driver management, or
-              transportation services are provided through this website. All actions performed
-              inside the application are simulated for demonstration purposes only.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-display text-lg font-bold text-navy">3. Fictional Content</h2>
-            <p className="mt-2 text-muted-foreground">
-              Any names, truck information, driver briefs, fleet statistics, training materials,
-              load boards, reports, or other content displayed on this website are fictional,
-              generated, or used strictly for demonstration purposes. Any resemblance to real
-              persons, companies, or operations is coincidental.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-display text-lg font-bold text-navy">4. No Reliance</h2>
-            <p className="mt-2 text-muted-foreground">
-              The website must not be relied upon for any real business operation, regulatory
-              filing, dispatch decision, safety-critical activity, or commercial transaction.
-              The content is provided "as is" without warranties of any kind.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-display text-lg font-bold text-navy">5. Limitation of Liability</h2>
-            <p className="mt-2 text-muted-foreground">
-              The creators of this website accept no responsibility or liability for any
-              misuse, loss, damage, or consequence arising from the use, misuse, or inability
-              to use this demonstration website.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-display text-lg font-bold text-navy">6. Acknowledgement</h2>
-            <p className="mt-2 text-muted-foreground">
-              By accessing or using this website, you acknowledge and agree that it is a
-              demonstration application created for educational, illustrative, and
-              entertainment purposes only, and you accept these terms in full.
-            </p>
-          </div>
-
+          {sections.map((sec, i) => (
+            <div key={i}>
+              <h2 className="font-display text-lg font-bold text-navy">{i + 1}. {sec.title}</h2>
+              <p className="mt-2 whitespace-pre-line text-muted-foreground">{sec.body}</p>
+            </div>
+          ))}
           <p className="pt-4 text-xs text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+            Last updated: {updated.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
           </p>
         </article>
       </section>

@@ -1,3 +1,4 @@
+import { logActivity } from "@/services/activityService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { identityFor, readCache, syncCloud, writeCache, applyOps, type FavCache } from "@/services/favouritesService";
@@ -63,6 +64,7 @@ export function useFavourites() {
       syncedAt: cache.syncedAt,
     };
     writeCache(identity, next);
+    logActivity(has ? "Favourite removed" : "Favourite added", id);
     setIds(new Set(next.ids));
     if (uid) void sync();
   }, [uid, sync]);

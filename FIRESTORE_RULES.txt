@@ -109,6 +109,21 @@ service cloud.firestore {
       allow create, update, delete: if request.auth != null;
     }
 
+    // Admin change history. Anyone may append a validated entry
+    // (song additions, favourites, requests come from visitors).
+    // Only admins can read or delete. Entries are never edited.
+    match /activityLog/{docId} {
+      allow create: if
+        request.resource.data.keys().hasOnly(['action', 'detail', 'actor', 'device', 'createdAt']) &&
+        request.resource.data.action is string && request.resource.data.action.size() > 0 && request.resource.data.action.size() <= 40 &&
+        request.resource.data.detail is string && request.resource.data.detail.size() <= 200 &&
+        request.resource.data.actor is string && request.resource.data.actor.size() <= 100 &&
+        request.resource.data.device is string && request.resource.data.device.size() <= 80 &&
+        request.resource.data.createdAt == request.time;
+      allow read, delete: if request.auth != null;
+      allow update: if false;
+    }
+
     // ---------------------------------------------------------------
     // Default deny — every other path is closed until an explicit
     // block above allows it.

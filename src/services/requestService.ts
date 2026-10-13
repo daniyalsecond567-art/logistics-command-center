@@ -1,3 +1,4 @@
+import { logActivity } from "@/services/activityService";
 import {
   addDoc,
   collection,
@@ -35,6 +36,7 @@ export async function createRequest(text: string) {
     status: "Pending",
     createdAt: serverTimestamp(),
   });
+  logActivity("Request submitted", clean);
 }
 
 export async function createIssue(text: string) {
@@ -46,6 +48,7 @@ export async function createIssue(text: string) {
     status: "Open",
     createdAt: serverTimestamp(),
   });
+  logActivity("Issue reported", clean);
 }
 
 export async function listRequests(): Promise<UserRequest[]> {
@@ -82,9 +85,11 @@ export async function decideRequest(id: string, decision: "Approved" | "Declined
     decision,
     decidedAt: serverTimestamp(),
   });
+  logActivity(`Request ${decision.toLowerCase()}`, id);
 }
 
 export async function deleteRequest(id: string) {
   const { db } = getFirebase();
   await deleteDoc(doc(db, COLL, id));
+  logActivity("Request deleted", id);
 }

@@ -16,6 +16,8 @@ import { FaCheck, FaTimes, FaPowerOff, FaLink } from "react-icons/fa";
 import { formatBytes, formatDuration } from "@/utils/format";
 import { setMaintenance } from "@/services/maintenanceService";
 import { listSongs, renameSong, deleteSong, type TrainingSong } from "@/services/songService";
+import { DEFAULT_TERMS, getTerms, saveTerms, type TermsSection } from "@/services/termsService";
+import { listActivity, deleteActivity, type ActivityEntry } from "@/services/activityService";
 import { useMaintenance } from "@/contexts/MaintenanceContext";
 
 export const Route = createFileRoute("/admin")({
@@ -198,6 +200,11 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
       <div className="container-max grid gap-6 pb-10 lg:grid-cols-2">
         <PendingPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
         <HistoryPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+      </div>
+
+      <div className="container-max grid gap-6 pb-10 lg:grid-cols-2">
+        <TermsPanel email={email} onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
+        <ActivityPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
       </div>
 
 
@@ -649,6 +656,115 @@ function SongsPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m:
               )}
               <button disabled={busyId === s.id} onClick={() => remove(s.id)} className="grid h-9 w-9 place-items-center rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10" aria-label="Delete"><FaTrash className="h-3.5 w-3.5" /></button>
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TermsPanel({ email, onError, onOk }: { email: string; onError: (m: string) => void; onOk: (m: string) => void }) {
+  const [sections, setSections] = useState<TermsSection[] | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    getTerms().then((t) => setSections(t?.sections ?? DEFAULT_TERMS)).catch(() => setSections(DEFAULT_TERMS));
+  }, []);
+  const upd = (i: number, k: keyof TermsSection, v: string) =>
+    setSections((p) => p?.map((s, j) => (j === i ? { ...s, [k]: v } : s)) ?? p);
+  const save = async () => {
+    if (!sections) return;
+    setSaving(true);
+    try { await saveTerms(sections, email); setEditing(false); onOk("Terms & Conditions updated."); }
+    catch (e) { onError((e as Error).message); }
+    finally { setSaving(false); }
+  };
+  const field = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-display text-lg font-bold text-navy">Terms & Conditions</h2>
+        {!editing && (
+          <button onClick={() => setEditing(true)} disabled={!sections}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-navy hover:bg-secondary disabled:opacity-40">
+            <FaPencilAlt className="h-3 w-3" /> Edit
+          </button>
+        )}
+      </div>
+      <div className="mt-4 max-h-[480px] space-y-3 overflow-y-auto pr-1">
+        {!sections && <div className="h-14 animate-pulse rounded-lg bg-secondary/70" />}
+        {sections?.map((s, i) => editing ? (
+          <div key={i} className="space-y-2 rounded-lg border border-border bg-secondary/30 p-3">
+            <div className="flex gap-2">
+              <input value={s.title} maxLength={120} onChange={(e) => upd(i, "title", e.target.value)} placeholder="Section title" className={field} />
+              <button onClick={() => setSections((p) => p?.filter((_, j) => j !== i) ?? p)} aria-label="Remove section"
+                className="rounded-lg px-2 text-destructive hover:bg-destructive/10"><FaTrash className="h-3 w-3" /></button>
+            </div>
+            <textarea value={s.body} maxLength={4000} rows={4} onChange={(e) => upd(i, "body", e.target.value)} placeholder="Section text" className={field} />
+          </div>
+        ) : (
+          <div key={i} className="rounded-lg border border-border bg-secondary/30 px-3 py-2.5">
+            <p className="truncate text-sm font-semibold text-navy">{i + 1}. {s.title}</p>
+            <p className="line-clamp-2 text-xs text-muted-foreground">{s.body}</p>
+          </div>
+        ))}
+      </div>
+      {editing && (
+        <div className="mt-4 flex flex-wrap justify-between gap-2">
+          <button onClick={() => setSections((p) => [...(p ?? []), { title: "", body: "" }])}
+            className="rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-navy hover:bg-secondary">+ Add section</button>
+          <div className="flex gap-2">
+            <button onClick={() => { setEditing(false); getTerms().then((t) => setSections(t?.sections ?? DEFAULT_TERMS)).catch(() => {}); }}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-navy hover:bg-secondary">Cancel</button>
+            <button onClick={save} disabled={saving}
+              className="rounded-lg bg-primary-gradient px-4 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50">{saving ? "Saving…" : "Save"}</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ActivityPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m: string) => void }) {
+  const [items, setItems] = useState<ActivityEntry[] | null>(null);
+  const [q, setQ] = useState("");
+  const load = async () => {
+    try { setItems(await listActivity()); } catch (e) { onError((e as Error).message); setItems([]); }
+  };
+  useEffect(() => { void load(); }, []);
+  const shown = useMemo(() => {
+    const t = q.trim().toLowerCase();
+    return (items ?? []).filter((it) => !t || `${it.action} ${it.detail} ${it.actor} ${it.device}`.toLowerCase().includes(t));
+  }, [items, q]);
+  const remove = async (id: string) => {
+    try { await deleteActivity(id); setItems((p) => p?.filter((x) => x.id !== id) ?? p); onOk("History entry deleted."); }
+    catch (e) { onError((e as Error).message); }
+  };
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-lg font-bold text-navy">Change history <span className="text-muted-foreground">({items?.length ?? 0})</span></h2>
+        <div className="flex gap-2">
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…"
+            className="w-36 rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none focus:border-primary" />
+          <button onClick={() => { setItems(null); void load(); }} className="rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-navy hover:bg-secondary">Refresh</button>
+        </div>
+      </div>
+      <div className="mt-4 max-h-[480px] space-y-2 overflow-y-auto pr-1">
+        {!items && <div className="h-14 animate-pulse rounded-lg bg-secondary/70" />}
+        {items && shown.length === 0 && (
+          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">No changes recorded yet.</div>
+        )}
+        {shown.map((it) => (
+          <div key={it.id} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-secondary/30 px-3 py-2.5">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-navy">{it.action}</p>
+              {it.detail && <p className="truncate text-xs text-foreground">{it.detail}</p>}
+              <p className="truncate text-[11px] text-muted-foreground">
+                {it.createdAt?.toDate().toLocaleString() ?? "just now"} · {it.actor} · {it.device}
+              </p>
+            </div>
+            <button onClick={() => remove(it.id)} aria-label="Delete entry" className="rounded-lg p-2 text-destructive hover:bg-destructive/10"><FaTrash className="h-3 w-3" /></button>
           </div>
         ))}
       </div>
