@@ -1,3 +1,4 @@
+import { logActivity } from "@/services/activityService";
 import { doc, onSnapshot, serverTimestamp, setDoc, type Timestamp } from "firebase/firestore";
 import { getFirebase } from "@/lib/firebase";
 
@@ -33,4 +34,5 @@ export async function setMaintenance(enabled: boolean, email: string) {
     { enabled, updatedAt: serverTimestamp(), updatedBy: email },
     { merge: true },
   );
+  logActivity(enabled ? "Maintenance on" : "Maintenance off", email);
 }

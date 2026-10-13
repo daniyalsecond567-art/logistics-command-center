@@ -1,3 +1,4 @@
+import { logActivity } from "@/services/activityService";
 import { collection, deleteDoc, updateDoc, doc, getDoc, getDocs, orderBy, query, serverTimestamp, setDoc, type Timestamp } from "firebase/firestore";
 import { getFirebase } from "@/lib/firebase";
 import { getAnonId } from "@/services/favouritesService";
@@ -55,6 +56,7 @@ export async function addSong(url: string, title: string): Promise<TrainingSong>
     createdAt: serverTimestamp(),
   };
   await setDoc(ref, data);
+  logActivity("Song added", `${clean} (${data.sourceUrl})`);
   return { id: ref.id, ...data, createdAt: null };
 }
 
@@ -63,9 +65,11 @@ export async function renameSong(id: string, title: string) {
   if (!clean || clean.length > 60) throw new Error("Title must be 1–60 characters.");
   const { db } = getFirebase();
   await updateDoc(doc(db, COLL, id), { title: clean });
+  logActivity("Song renamed", clean);
 }
 
 export async function deleteSong(id: string) {
   const { db } = getFirebase();
   await deleteDoc(doc(db, COLL, id));
+  logActivity("Song deleted", id);
 }

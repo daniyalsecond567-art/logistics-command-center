@@ -1,3 +1,4 @@
+import { logActivity } from "@/services/activityService";
 import {
   addDoc,
   collection,
@@ -34,14 +35,17 @@ export async function listTraining(): Promise<TrainingAudio[]> {
 export async function createTraining(input: Omit<TrainingAudio, "id" | "createdAt">) {
   const { db } = getFirebase();
   await addDoc(collection(db, COLL), { ...input, createdAt: serverTimestamp() });
+  logActivity("Brief added", input.title);
 }
 
 export async function renameTraining(id: string, title: string, description: string) {
   const { db } = getFirebase();
   await updateDoc(doc(db, COLL, id), { title, description });
+  logActivity("Brief renamed", `${title} — ${description}`);
 }
 
 export async function deleteTraining(id: string) {
   const { db } = getFirebase();
   await deleteDoc(doc(db, COLL, id));
+  logActivity("Brief deleted", id);
 }
