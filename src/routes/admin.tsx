@@ -19,6 +19,7 @@ import { listSongs, renameSong, deleteSong, type TrainingSong } from "@/services
 import { DEFAULT_TERMS, getTerms, saveTerms, type TermsSection } from "@/services/termsService";
 import { listActivity, deleteActivity, type ActivityEntry } from "@/services/activityService";
 import { useMaintenance } from "@/contexts/MaintenanceContext";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -731,7 +732,12 @@ function ActivityPanel({ onError, onOk }: { onError: (m: string) => void; onOk: 
   const load = async () => {
     try { setItems(await listActivity()); } catch (e) { onError((e as Error).message); setItems([]); }
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    const refresh = () => { void load(); };
+    window.addEventListener("activity:refresh", refresh);
+    return () => window.removeEventListener("activity:refresh", refresh);
+  }, []);
   const shown = useMemo(() => {
     const t = q.trim().toLowerCase();
     return (items ?? []).filter((it) => !t || `${it.action} ${it.detail} ${it.actor} ${it.device}`.toLowerCase().includes(t));
@@ -741,30 +747,30 @@ function ActivityPanel({ onError, onOk }: { onError: (m: string) => void; onOk: 
     catch (e) { onError((e as Error).message); }
   };
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-lg font-bold text-navy">Change history <span className="text-muted-foreground">({items?.length ?? 0})</span></h2>
-        <div className="flex gap-2">
+    <div className="min-w-0 rounded-2xl border border-border bg-card p-6 shadow-card">
+      <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <h2 className="min-w-0 font-display text-lg font-bold text-navy">Change history <span className="text-muted-foreground">({items?.length ?? 0})</span></h2>
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…"
-            className="w-36 rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none focus:border-primary" />
-          <button onClick={() => { setItems(null); void load(); }} className="rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-navy hover:bg-secondary">Refresh</button>
+            aria-label="Search change history" className="min-w-0 w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none focus:border-primary sm:w-36" />
+          <Button variant="outline" onClick={() => { setItems(null); void load(); }} className="h-auto shrink-0 rounded-lg border-border px-3 py-1.5 text-sm font-semibold text-navy hover:bg-secondary">Refresh</Button>
         </div>
       </div>
-      <div className="mt-4 max-h-[480px] space-y-2 overflow-y-auto pr-1">
+      <div className="mt-4 min-w-0 max-h-[480px] space-y-2 overflow-y-auto pr-1">
         {!items && <div className="h-14 animate-pulse rounded-lg bg-secondary/70" />}
         {items && shown.length === 0 && (
           <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">No changes recorded yet.</div>
         )}
         {shown.map((it) => (
-          <div key={it.id} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-secondary/30 px-3 py-2.5">
-            <div className="min-w-0 flex-1">
+          <div key={it.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-lg border border-border bg-secondary/30 px-3 py-2.5">
+            <div className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">
               <p className="text-sm font-semibold text-navy">{it.action}</p>
-              {it.detail && <p className="truncate text-xs text-foreground">{it.detail}</p>}
-              <p className="truncate text-[11px] text-muted-foreground">
+              {it.detail && <p className="text-xs text-foreground">{it.detail}</p>}
+              <p className="text-[11px] text-muted-foreground">
                 {it.createdAt?.toDate().toLocaleString() ?? "just now"} · {it.actor} · {it.device}
               </p>
             </div>
-            <button onClick={() => remove(it.id)} aria-label="Delete entry" className="rounded-lg p-2 text-destructive hover:bg-destructive/10"><FaTrash className="h-3 w-3" /></button>
+            <Button variant="ghost" size="icon" onClick={() => remove(it.id)} aria-label="Delete entry" className="h-8 w-8 shrink-0 rounded-lg p-2 text-destructive hover:bg-destructive/10"><FaTrash className="h-3 w-3" /></Button>
           </div>
         ))}
       </div>

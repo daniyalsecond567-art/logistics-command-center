@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep shared interaction timing and CSS reduced-motion overrides in `src/styles.css`, and gate JavaScript-driven visual effects with `useReducedMotion`; this prevents inconsistent accessibility behavior without changing application logic.
+- Capture descriptive activity details before destructive edits through best-effort reads; failed history lookups must not block existing actions, and deleted resource names must remain identifiable.
