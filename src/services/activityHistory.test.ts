@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 const records: Record<string, Record<string, unknown>> = {};
