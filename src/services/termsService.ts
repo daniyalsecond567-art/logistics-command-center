@@ -1,6 +1,6 @@
 import { doc, getDoc, serverTimestamp, setDoc, type Timestamp } from "firebase/firestore";
 import { getFirebase } from "@/lib/firebase";
-import { logActivity } from "@/services/activityService";
+import { logActivity, readActivityFields } from "@/services/activityService";
 
 export interface TermsSection { title: string; body: string }
 export interface TermsDoc { sections: TermsSection[]; updatedAt: Timestamp | null }
@@ -34,6 +34,15 @@ export async function saveTerms(sections: TermsSection[], email: string) {
     .filter((s) => s.title || s.body);
   if (!clean.length) throw new Error("Add at least one section.");
   const { db } = getFirebase();
+  const before = await readActivityFields(...REF);
+  const previous = Array.isArray(before.sections) ? before.sections as TermsSection[] : DEFAULT_TERMS;
   await setDoc(doc(db, ...REF), { sections: clean, updatedAt: serverTimestamp(), updatedBy: email });
-  logActivity("Terms updated", `${clean.length} section(s)`);
+  for (const section of clean) {
+    const old = previous.find((s) => s.title === section.title);
+    if (!old) logActivity("Terms section added", section.title || "Untitled section");
+    else if (old.body !== section.body) logActivity("Terms section updated", `${section.title || "Untitled section"} — section text changed`);
+  }
+  for (const section of previous) {
+    if (!clean.some((s) => s.title === section.title)) logActivity("Terms section removed", section.title || "Untitled section");
+  }
 }

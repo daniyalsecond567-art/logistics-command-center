@@ -1,4 +1,4 @@
-import { logActivity } from "@/services/activityService";
+import { logActivity, readActivityFields } from "@/services/activityService";
 import {
   addDoc,
   collection,
@@ -80,16 +80,18 @@ export async function listHistoryRequests(): Promise<UserRequest[]> {
 
 export async function decideRequest(id: string, decision: "Approved" | "Declined") {
   const { db } = getFirebase();
+  const before = await readActivityFields(COLL, id);
   await updateDoc(doc(db, COLL, id), {
     status: decision,
     decision,
     decidedAt: serverTimestamp(),
   });
-  logActivity(`Request ${decision.toLowerCase()}`, id);
+  logActivity(`Request ${decision.toLowerCase()}`, typeof before.text === "string" ? before.text : `Request ${id}`);
 }
 
 export async function deleteRequest(id: string) {
   const { db } = getFirebase();
+  const before = await readActivityFields(COLL, id);
   await deleteDoc(doc(db, COLL, id));
-  logActivity("Request deleted", id);
+  logActivity("Request deleted", typeof before.text === "string" ? before.text : `Request ${id}`);
 }

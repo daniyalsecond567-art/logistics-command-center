@@ -1,4 +1,4 @@
-# Animation polish
-- [ ] Polish shared transitions and interaction feedback without layout or behavior changes.
-- [ ] Respect reduced motion across CSS and JavaScript effects.
-- [ ] Verify normal and reduced-motion behavior in the browser.
+# History accuracy and text fitting
+- [ ] Record resource titles and specific changes in existing history events.
+- [ ] Keep all history text visible within its container across display sizes.
+- [ ] Test logging and history layout; verify live admin access if available.

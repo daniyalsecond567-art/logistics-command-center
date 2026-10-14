@@ -1,4 +1,4 @@
-import { logActivity } from "@/services/activityService";
+import { logActivity, readActivityFields, resourceDetail } from "@/services/activityService";
 import {
   addDoc,
   collection,
@@ -40,12 +40,17 @@ export async function createTraining(input: Omit<TrainingAudio, "id" | "createdA
 
 export async function renameTraining(id: string, title: string, description: string) {
   const { db } = getFirebase();
+  const before = await readActivityFields(COLL, id);
   await updateDoc(doc(db, COLL, id), { title, description });
-  logActivity("Brief renamed", `${title} — ${description}`);
+  const changes: string[] = [];
+  if (before.title !== title) changes.push(`Title: ${resourceDetail(id, typeof before.title === "string" ? before.title : undefined)} → “${title}”`);
+  if (before.description !== description) changes.push(`Note: “${typeof before.description === "string" ? before.description : ""}” → “${description}”`);
+  if (changes.length) logActivity("Brief updated", `“${title}” — ${changes.join("; ")}`);
 }
 
 export async function deleteTraining(id: string) {
   const { db } = getFirebase();
+  const before = await readActivityFields(COLL, id);
   await deleteDoc(doc(db, COLL, id));
-  logActivity("Brief deleted", id);
+  logActivity("Brief deleted", resourceDetail(id, typeof before.title === "string" ? before.title : undefined));
 }

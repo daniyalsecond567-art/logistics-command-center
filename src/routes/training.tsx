@@ -163,10 +163,10 @@ function TrainingPage() {
         {filtered && (filtered.length > 0 || filteredSongs.length > 0) && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredSongs.map((s) => (
-              <SongCard key={s.id} item={s} favourite={isFavourite(s.id)} onToggleFav={() => toggle(s.id)} />
+              <SongCard key={s.id} item={s} favourite={isFavourite(s.id)} onToggleFav={() => toggle(s.id, s.title)} />
             ))}
             {filtered.map((t) => (
-              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={() => toggle(t.id)} />
+              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={() => toggle(t.id, t.title)} />
             ))}
           </div>
         )}

@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, type Timestamp } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, type Timestamp } from "firebase/firestore";
 import { getFirebase } from "@/lib/firebase";
 import { getAnonId } from "@/services/favouritesService";
 
@@ -13,6 +13,19 @@ export interface ActivityEntry {
 }
 
 const COLL = "activityLog";
+
+/** History lookups must never prevent the underlying edit or deletion. */
+export async function readActivityFields(collectionName: string, id: string): Promise<Record<string, unknown>> {
+  try {
+    const { db } = getFirebase();
+    const snapshot = await getDoc(doc(db, collectionName, id));
+    return snapshot.exists() ? snapshot.data() : {};
+  } catch { return {}; }
+}
+
+export function resourceDetail(id: string, title?: string): string {
+  return title?.trim() ? `“${title.trim()}”` : `Resource ${id}`;
+}
 
 export function describeDevice(): string {
   if (typeof navigator === "undefined") return "Unknown";
@@ -35,6 +48,8 @@ export function logActivity(action: string, detail = "") {
       actor: (u ? u.email ?? `user:${u.uid}` : `visitor:${getAnonId().slice(0, 8)}`).slice(0, 100),
       device: describeDevice(),
       createdAt: serverTimestamp(),
+    }).then(() => {
+      window.dispatchEvent(new Event("activity:refresh"));
     }).catch(() => { /* ignore: history must never block the real action */ });
   } catch { /* ignore */ }
 }
