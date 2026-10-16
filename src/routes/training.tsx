@@ -163,10 +163,10 @@ function TrainingPage() {
         {filtered && (filtered.length > 0 || filteredSongs.length > 0) && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredSongs.map((s) => (
-              <SongCard key={s.id} item={s} favourite={isFavourite(s.id)} onToggleFav={() => toggle(s.id, s.title)} />
+              <SongCard key={s.id} item={s} favourite={isFavourite(s.id)} onToggleFav={features.favourites ? () => toggle(s.id, s.title, "Song") : undefined} />
             ))}
             {filtered.map((t) => (
-              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={() => toggle(t.id, t.title)} />
+              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={features.favourites ? () => toggle(t.id, t.title, "Brief") : undefined} />
             ))}
           </div>
         )}
@@ -321,7 +321,7 @@ function IssueModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favourite: boolean; onToggleFav: () => void }) {
+function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favourite: boolean; onToggleFav?: () => void }) {
   const { playing, toggle } = useAudioPlayer(item.audioUrl);
 
   return (
@@ -338,6 +338,7 @@ function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favo
           <div className="truncate text-[11px] text-muted-foreground" title={item.description}>{item.description}</div>
         )}
       </div>
+      {onToggleFav && (
       <button
         type="button"
         onClick={onToggleFav}
@@ -349,6 +350,7 @@ function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favo
       >
         {favourite ? <FaHeart className="h-3.5 w-3.5" /> : <FaRegHeart className="h-3.5 w-3.5" />}
       </button>
+      )}
       <button
         type="button"
         onClick={toggle}
@@ -433,7 +435,7 @@ function SongModal({ onClose, onAdded }: { onClose: () => void; onAdded: (s: Tra
   );
 }
 
-function SongCard({ item, favourite, onToggleFav }: { item: TrainingSong; favourite: boolean; onToggleFav: () => void }) {
+function SongCard({ item, favourite, onToggleFav }: { item: TrainingSong; favourite: boolean; onToggleFav?: () => void }) {
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -464,10 +466,12 @@ function SongCard({ item, favourite, onToggleFav }: { item: TrainingSong; favour
           <span className="text-[9px] font-bold uppercase tracking-widest text-primary">Song</span>
           <div className="truncate text-sm font-semibold text-navy" title={item.title}>{item.title}</div>
         </div>
+        {onToggleFav && (
         <button type="button" onClick={onToggleFav} aria-label={favourite ? "Remove from favourites" : "Add to favourites"} aria-pressed={favourite}
           className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${favourite ? "text-destructive" : "text-muted-foreground hover:text-destructive"}`}>
           {favourite ? <FaHeart className="h-3.5 w-3.5" /> : <FaRegHeart className="h-3.5 w-3.5" />}
         </button>
+        )}
         <button type="button" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"}
           className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${playing ? "bg-navy text-navy-foreground" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}>
           {playing ? <FaPause className="h-3 w-3" /> : <FaPlay className="ml-0.5 h-3 w-3" />}
