@@ -8,6 +8,7 @@ import { listSongs, addSong, parseYouTubeId, type TrainingSong } from "@/service
 
 const SONG_PLAY_EVENT = "trucking1:song-play";
 import { useFavourites } from "@/hooks/useFavourites";
+import { useFeatures } from "@/hooks/useFeatures";
 import { createRequest, createIssue } from "@/services/requestService";
 
 
@@ -34,8 +35,10 @@ function TrainingPage() {
   const [songs, setSongs] = useState<TrainingSong[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
-  const [tab, setTab] = useState<"all" | "favs">("all");
+  const [tabState, setTab] = useState<"all" | "favs">("all");
   const { favourites, isFavourite, toggle } = useFavourites();
+  const features = useFeatures();
+  const tab = features.favourites ? tabState : "all";
 
   useEffect(() => {
     let alive = true;
@@ -75,6 +78,7 @@ function TrainingPage() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <FaClipboardList /> Internal driver resources — for company personnel only.
           </div>
+          {features.favourites && (
           <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-card">
             {([["all", "All"], ["favs", "Favourites"]] as const).map(([key, label]) => (
               <button
@@ -91,6 +95,7 @@ function TrainingPage() {
               </button>
             ))}
           </div>
+          )}
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
               <FaSearch className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -101,6 +106,7 @@ function TrainingPage() {
                 className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
+            {features.addRequest && (
             <button
               type="button"
               onClick={() => setShowRequest(true)}
@@ -108,6 +114,8 @@ function TrainingPage() {
             >
               <FaPlus className="h-3 w-3" /> Add Request
             </button>
+            )}
+            {features.addSong && (
             <button
               type="button"
               onClick={() => setShowSong(true)}
@@ -115,6 +123,8 @@ function TrainingPage() {
             >
               <FaMusic className="h-3 w-3" /> Add Song
             </button>
+            )}
+            {features.reportIssue && (
             <button
               type="button"
               onClick={() => setShowIssue(true)}
@@ -122,6 +132,7 @@ function TrainingPage() {
             >
               <FaExclamationTriangle className="h-3 w-3" /> Report an Issue
             </button>
+            )}
           </div>
         </div>
 
