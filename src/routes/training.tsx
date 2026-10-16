@@ -8,6 +8,7 @@ import { listSongs, addSong, parseYouTubeId, type TrainingSong } from "@/service
 
 const SONG_PLAY_EVENT = "trucking1:song-play";
 import { useFavourites } from "@/hooks/useFavourites";
+import { useFeatures } from "@/hooks/useFeatures";
 import { createRequest, createIssue } from "@/services/requestService";
 
 
@@ -34,8 +35,10 @@ function TrainingPage() {
   const [songs, setSongs] = useState<TrainingSong[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState("");
-  const [tab, setTab] = useState<"all" | "favs">("all");
+  const [tabState, setTab] = useState<"all" | "favs">("all");
   const { favourites, isFavourite, toggle } = useFavourites();
+  const features = useFeatures();
+  const tab = features.favourites ? tabState : "all";
 
   useEffect(() => {
     let alive = true;
@@ -75,6 +78,7 @@ function TrainingPage() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <FaClipboardList /> Internal driver resources — for company personnel only.
           </div>
+          {features.favourites && (
           <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-card">
             {([["all", "All"], ["favs", "Favourites"]] as const).map(([key, label]) => (
               <button
@@ -91,6 +95,7 @@ function TrainingPage() {
               </button>
             ))}
           </div>
+          )}
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <div className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
               <FaSearch className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -101,6 +106,7 @@ function TrainingPage() {
                 className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
+            {features.addRequest && (
             <button
               type="button"
               onClick={() => setShowRequest(true)}
@@ -108,6 +114,8 @@ function TrainingPage() {
             >
               <FaPlus className="h-3 w-3" /> Add Request
             </button>
+            )}
+            {features.addSong && (
             <button
               type="button"
               onClick={() => setShowSong(true)}
@@ -115,6 +123,8 @@ function TrainingPage() {
             >
               <FaMusic className="h-3 w-3" /> Add Song
             </button>
+            )}
+            {features.reportIssue && (
             <button
               type="button"
               onClick={() => setShowIssue(true)}
@@ -122,6 +132,7 @@ function TrainingPage() {
             >
               <FaExclamationTriangle className="h-3 w-3" /> Report an Issue
             </button>
+            )}
           </div>
         </div>
 
@@ -163,10 +174,10 @@ function TrainingPage() {
         {filtered && (filtered.length > 0 || filteredSongs.length > 0) && (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredSongs.map((s) => (
-              <SongCard key={s.id} item={s} favourite={isFavourite(s.id)} onToggleFav={() => toggle(s.id, s.title)} />
+              <SongCard key={s.id} item={s} favourite={isFavourite(s.id)} onToggleFav={features.favourites ? () => toggle(s.id, s.title, "Song") : undefined} />
             ))}
             {filtered.map((t) => (
-              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={() => toggle(t.id, t.title)} />
+              <BriefCard key={t.id} item={t} favourite={isFavourite(t.id)} onToggleFav={features.favourites ? () => toggle(t.id, t.title, "Brief") : undefined} />
             ))}
           </div>
         )}
@@ -321,7 +332,7 @@ function IssueModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favourite: boolean; onToggleFav: () => void }) {
+function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favourite: boolean; onToggleFav?: () => void }) {
   const { playing, toggle } = useAudioPlayer(item.audioUrl);
 
   return (
@@ -338,6 +349,7 @@ function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favo
           <div className="truncate text-[11px] text-muted-foreground" title={item.description}>{item.description}</div>
         )}
       </div>
+      {onToggleFav && (
       <button
         type="button"
         onClick={onToggleFav}
@@ -349,6 +361,7 @@ function BriefCard({ item, favourite, onToggleFav }: { item: TrainingAudio; favo
       >
         {favourite ? <FaHeart className="h-3.5 w-3.5" /> : <FaRegHeart className="h-3.5 w-3.5" />}
       </button>
+      )}
       <button
         type="button"
         onClick={toggle}
@@ -433,7 +446,7 @@ function SongModal({ onClose, onAdded }: { onClose: () => void; onAdded: (s: Tra
   );
 }
 
-function SongCard({ item, favourite, onToggleFav }: { item: TrainingSong; favourite: boolean; onToggleFav: () => void }) {
+function SongCard({ item, favourite, onToggleFav }: { item: TrainingSong; favourite: boolean; onToggleFav?: () => void }) {
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -464,10 +477,12 @@ function SongCard({ item, favourite, onToggleFav }: { item: TrainingSong; favour
           <span className="text-[9px] font-bold uppercase tracking-widest text-primary">Song</span>
           <div className="truncate text-sm font-semibold text-navy" title={item.title}>{item.title}</div>
         </div>
+        {onToggleFav && (
         <button type="button" onClick={onToggleFav} aria-label={favourite ? "Remove from favourites" : "Add to favourites"} aria-pressed={favourite}
           className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${favourite ? "text-destructive" : "text-muted-foreground hover:text-destructive"}`}>
           {favourite ? <FaHeart className="h-3.5 w-3.5" /> : <FaRegHeart className="h-3.5 w-3.5" />}
         </button>
+        )}
         <button type="button" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"}
           className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${playing ? "bg-navy text-navy-foreground" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}>
           {playing ? <FaPause className="h-3 w-3" /> : <FaPlay className="ml-0.5 h-3 w-3" />}

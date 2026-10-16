@@ -52,7 +52,7 @@ export function useFavourites() {
     };
   }, [uid, loading, sync]);
 
-  const toggle = useCallback((id: string, title?: string) => {
+  const toggle = useCallback((id: string, title?: string, kind?: string) => {
     const identity = identityRef.current;
     if (!identity) return;
     const cache = readCache(identity);
@@ -64,7 +64,7 @@ export function useFavourites() {
       syncedAt: cache.syncedAt,
     };
     writeCache(identity, next);
-    logActivity(has ? "Favourite removed" : "Favourite added", resourceDetail(id, title));
+    logActivity(has ? "Favourite removed" : "Favourite added", kind ? `${kind} ${resourceDetail(id, title)}` : resourceDetail(id, title));
     setIds(new Set(next.ids));
     if (uid) void sync();
   }, [uid, sync]);

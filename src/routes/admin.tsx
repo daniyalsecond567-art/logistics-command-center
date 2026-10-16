@@ -20,6 +20,8 @@ import { DEFAULT_TERMS, getTerms, saveTerms, type TermsSection } from "@/service
 import { listActivity, deleteActivity, type ActivityEntry } from "@/services/activityService";
 import { useMaintenance } from "@/contexts/MaintenanceContext";
 import { Button } from "@/components/ui/button";
+import { FEATURE_LABELS, setFeature, type FeatureKey } from "@/services/featureService";
+import { useFeatures } from "@/hooks/useFeatures";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -204,6 +206,7 @@ function AdminDashboard({ email, onLogout }: { email: string; onLogout: () => vo
       </div>
 
       <div className="container-max grid gap-6 pb-10 lg:grid-cols-2">
+        <FeatureAccessPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
         <TermsPanel email={email} onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
         <ActivityPanel onError={(m) => setToast({ kind: "err", msg: m })} onOk={(m) => setToast({ kind: "ok", msg: m })} />
       </div>
@@ -775,5 +778,39 @@ function ActivityPanel({ onError, onOk }: { onError: (m: string) => void; onOk: 
         ))}
       </div>
     </div>
+  );
+}
+
+function FeatureAccessPanel({ onError, onOk }: { onError: (m: string) => void; onOk: (m: string) => void }) {
+  const features = useFeatures();
+  const [busy, setBusy] = useState<FeatureKey | null>(null);
+  const change = async (key: FeatureKey, on: boolean) => {
+    setBusy(key);
+    try { await setFeature(key, on); onOk(`${FEATURE_LABELS[key]} ${on ? "added for everyone" : "removed for everyone"}.`); }
+    catch (e) { onError((e as Error).message); }
+    finally { setBusy(null); }
+  };
+  return (
+    <section className="mt-8 rounded-xl border border-border bg-card p-4 shadow-card sm:p-6">
+      <h2 className="font-display text-lg font-bold text-navy">Training access</h2>
+      <p className="mb-4 text-xs text-muted-foreground">Choose which Training page options visitors can see.</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {(Object.keys(FEATURE_LABELS) as FeatureKey[]).map((key) => {
+          const on = features[key];
+          return (
+            <div key={key} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3">
+              <div className="min-w-0">
+                <div className="break-words text-sm font-semibold text-navy">{FEATURE_LABELS[key]}</div>
+                <div className={`text-xs ${on ? "text-primary" : "text-destructive"}`}>{on ? "Visible to everyone" : "Hidden from everyone"}</div>
+              </div>
+              <button type="button" disabled={busy === key} onClick={() => change(key, !on)}
+                className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-60 ${on ? "border-destructive/40 text-destructive hover:bg-destructive/10" : "border-primary bg-primary text-primary-foreground hover:bg-primary/90"}`}>
+                {on ? "Remove" : "Add"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
